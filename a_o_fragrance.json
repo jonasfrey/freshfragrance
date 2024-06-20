@@ -1,0 +1,572 @@
+[
+    {
+        "n_id": 1,
+        "a_o_component": [
+            {
+                "o_scent": {
+                    "s_name": "Citronella",
+                    "s_desc": "Cymbopogon winterianus",
+                    "a_s_url_img": [
+                        "./images/citronella.png"
+                    ],
+                    "n_gram_per_ml": 0.88
+                },
+                "n_nor": 0.22,
+                "_o_js": {
+                    "o_jsh": {
+                        "s_tag": "input",
+                        "type": "number",
+                        "min": 1,
+                        "max": 99,
+                        "step": 1,
+                        "value": "22.00"
+                    },
+                    "_o_html": {
+                        "s_tag": "input"
+                    }
+                }
+            },
+            {
+                "o_scent": {
+                    "s_name": "Bergamottenminze",
+                    "s_desc": "Mentha citrata",
+                    "a_s_url_img": [
+                        "./images/bergamottenminze.jpeg"
+                    ],
+                    "n_gram_per_ml": 0.89
+                },
+                "n_nor": 0.66,
+                "_o_js": {
+                    "o_jsh": {
+                        "s_tag": "input",
+                        "type": "number",
+                        "min": 1,
+                        "max": 99,
+                        "step": 1,
+                        "value": "66.00"
+                    },
+                    "_o_html": {
+                        "s_tag": "input"
+                    }
+                }
+            },
+            {
+                "o_scent": {
+                    "s_name": "Fichtennadel",
+                    "s_desc": "Picea abies",
+                    "a_s_url_img": [
+                        "./images/picea_abies.jpeg"
+                    ],
+                    "n_gram_per_ml": 0.89
+                },
+                "n_nor": 0.12000000000000002,
+                "_o_js": {
+                    "o_jsh": {
+                        "s_tag": "input",
+                        "type": "number",
+                        "min": 1,
+                        "max": 99,
+                        "step": 1,
+                        "value": "12.00"
+                    },
+                    "_o_html": {
+                        "s_tag": "input"
+                    }
+                }
+            }
+        ],
+        "n_nor_ethanol": 0.19999999999999996
+    },
+    {
+        "n_id": 2,
+        "a_o_component": [
+            {
+                "o_scent": {
+                    "s_name": "Bergamottenminze",
+                    "s_desc": "Mentha citrata",
+                    "a_s_url_img": [
+                        "./images/bergamottenminze.jpeg"
+                    ],
+                    "n_gram_per_ml": 0.89
+                },
+                "n_nor": 1,
+                "_o_js": {
+                    "o_jsh": {
+                        "s_tag": "input",
+                        "type": "number",
+                        "min": 1,
+                        "max": 99,
+                        "step": 1,
+                        "value": "100.00"
+                    },
+                    "_o_html": {
+                        "s_tag": "input"
+                    }
+                }
+            }
+        ],
+        "n_nor_ethanol": 0.8
+    },
+    {
+        "n_id": 3,
+        "a_o_component": [
+            {
+                "o_scent": {
+                    "s_name": "Bergamottenminze",
+                    "s_desc": "Mentha citrata",
+                    "a_s_url_img": [
+                        "./images/bergamottenminze.jpeg"
+                    ],
+                    "n_gram_per_ml": 0.89
+                },
+                "n_nor": 1,
+                "_o_js": {
+                    "o_jsh": {
+                        "s_tag": "input",
+                        "type": "number",
+                        "min": 1,
+                        "max": 99,
+                        "step": 1,
+                        "value": "100.00"
+                    },
+                    "_o_html": {
+                        "s_tag": "input"
+                    }
+                }
+            }
+        ],
+        "n_nor_ethanol": 0.8
+    },
+    {
+        "n_id": 4,
+        "a_o_component": [
+            {
+                "o_scent": {
+                    "s_name": "Bergamottenminze",
+                    "s_desc": "Mentha citrata",
+                    "a_s_url_img": [
+                        "./images/bergamottenminze.jpeg"
+                    ],
+                    "n_gram_per_ml": 0.89
+                },
+                "n_nor": 1,
+                "_o_js": {
+                    "o_jsh": {
+                        "s_tag": "input",
+                        "type": "number",
+                        "min": 1,
+                        "max": 99,
+                        "step": 1,
+                        "value": "100.00"
+                    },
+                    "_o_html": {
+                        "s_tag": "input"
+                    }
+                }
+            }
+        ],
+        "n_nor_ethanol": 0.8
+    },
+    {
+        "n_id": 0,
+        "a_o_component": [
+            {
+                "o_scent": {
+                    "s_name": "Bergamottenminze",
+                    "s_desc": "Mentha citrata",
+                    "a_s_url_img": [
+                        "./images/bergamottenminze.jpeg"
+                    ],
+                    "n_gram_per_ml": 0.89
+                },
+                "n_nor": 1,
+                "_o_js": {
+                    "o_jsh": {
+                        "s_tag": "input",
+                        "type": "number",
+                        "min": 1,
+                        "max": 99,
+                        "step": 1,
+                        "value": "100.00"
+                    },
+                    "_o_html": {
+                        "s_tag": "input"
+                    }
+                }
+            }
+        ],
+        "n_nor_ethanol": 0.8
+    },
+    {
+        "n_id": 8,
+        "a_o_component": [
+            {
+                "o_scent": {
+                    "s_name": "Vanilla",
+                    "s_desc": "essential oil, vanilla planifolia",
+                    "a_s_url_img": [
+                        "./images/vanilla.jpeg"
+                    ],
+                    "n_gram_per_ml": 0.96
+                },
+                "n_nor": 0.24,
+                "_o_js": {
+                    "o_jsh": {
+                        "s_tag": "input",
+                        "type": "number",
+                        "min": 1,
+                        "max": 99,
+                        "step": 1,
+                        "value": "24.00"
+                    },
+                    "_o_html": {
+                        "s_tag": "input"
+                    }
+                }
+            },
+            {
+                "o_scent": {
+                    "s_name": "Lavandin super",
+                    "s_desc": "Lavandula hybrida",
+                    "a_s_url_img": [
+                        "./images/lavendel.jpeg"
+                    ],
+                    "n_gram_per_ml": 0.91
+                },
+                "n_nor": 0.18,
+                "_o_js": {
+                    "o_jsh": {
+                        "s_tag": "input",
+                        "type": "number",
+                        "min": 1,
+                        "max": 99,
+                        "step": 1,
+                        "value": "18.00"
+                    },
+                    "_o_html": {
+                        "s_tag": "input"
+                    }
+                }
+            },
+            {
+                "o_scent": {
+                    "s_name": "Jasmin Absolute 10%",
+                    "s_desc": "Jasminum Grandiflorum",
+                    "a_s_url_img": [
+                        "./images/jasmin.jpeg"
+                    ],
+                    "n_gram_per_ml": 0.89
+                },
+                "n_nor": 0.18,
+                "_o_js": {
+                    "o_jsh": {
+                        "s_tag": "input",
+                        "type": "number",
+                        "min": 1,
+                        "max": 99,
+                        "step": 1,
+                        "value": "18.00"
+                    },
+                    "_o_html": {
+                        "s_tag": "input"
+                    }
+                }
+            },
+            {
+                "o_scent": {
+                    "s_name": "Thymian Linalool",
+                    "s_desc": "Thymus vulgaris",
+                    "a_s_url_img": [
+                        "./images/thymian.jpeg"
+                    ],
+                    "n_gram_per_ml": 0.91
+                },
+                "n_nor": 0.12,
+                "_o_js": {
+                    "o_jsh": {
+                        "s_tag": "input",
+                        "type": "number",
+                        "min": 1,
+                        "max": 99,
+                        "step": 1,
+                        "value": "12.00"
+                    },
+                    "_o_html": {
+                        "s_tag": "input"
+                    }
+                }
+            },
+            {
+                "o_scent": {
+                    "s_name": "Zimtrinde",
+                    "s_desc": "Cinnamomum zeylanicum",
+                    "a_s_url_img": [
+                        "./images/zimtrinde.jpeg"
+                    ],
+                    "n_gram_per_ml": 1
+                },
+                "n_nor": 0.12,
+                "_o_js": {
+                    "o_jsh": {
+                        "s_tag": "input",
+                        "type": "number",
+                        "min": 1,
+                        "max": 99,
+                        "step": 1,
+                        "value": "12.00"
+                    },
+                    "_o_html": {
+                        "s_tag": "input"
+                    }
+                }
+            },
+            {
+                "o_scent": {
+                    "s_name": "Bergamottenminze",
+                    "s_desc": "Mentha citrata",
+                    "a_s_url_img": [
+                        "./images/bergamottenminze.jpeg"
+                    ],
+                    "n_gram_per_ml": 0.89
+                },
+                "n_nor": 0.06,
+                "_o_js": {
+                    "o_jsh": {
+                        "s_tag": "input",
+                        "type": "number",
+                        "min": 1,
+                        "max": 99,
+                        "step": 1,
+                        "value": "6.00"
+                    },
+                    "_o_html": {
+                        "s_tag": "input"
+                    }
+                }
+            },
+            {
+                "o_scent": {
+                    "s_name": "Tanne weiss",
+                    "s_desc": "Aibes alba",
+                    "a_s_url_img": [
+                        "./images/tanne_weiss.jpeg"
+                    ],
+                    "n_gram_per_ml": 0.9
+                },
+                "n_nor": 0.06,
+                "_o_js": {
+                    "o_jsh": {
+                        "s_tag": "input",
+                        "type": "number",
+                        "min": 1,
+                        "max": 99,
+                        "step": 1,
+                        "value": "6.00"
+                    },
+                    "_o_html": {
+                        "s_tag": "input"
+                    }
+                }
+            },
+            {
+                "o_scent": {
+                    "s_name": "Salbei",
+                    "s_desc": "Salvia officinalis",
+                    "a_s_url_img": [
+                        "./images/salvia.jpeg"
+                    ],
+                    "n_gram_per_ml": 0.92
+                },
+                "n_nor": 0.02,
+                "_o_js": {
+                    "o_jsh": {
+                        "s_tag": "input",
+                        "type": "number",
+                        "min": 1,
+                        "max": 99,
+                        "step": 1,
+                        "value": "2.00"
+                    },
+                    "_o_html": {
+                        "s_tag": "input"
+                    }
+                }
+            },
+            {
+                "o_scent": {
+                    "s_name": "Citronella",
+                    "s_desc": "Cymbopogon winterianus",
+                    "a_s_url_img": [
+                        "./images/citronella.png"
+                    ],
+                    "n_gram_per_ml": 0.88
+                },
+                "n_nor": 0.02000000000000009,
+                "_o_js": {
+                    "o_jsh": {
+                        "s_tag": "input",
+                        "type": "number",
+                        "min": 1,
+                        "max": 99,
+                        "step": 1,
+                        "value": "2.00"
+                    },
+                    "_o_html": {
+                        "s_tag": "input"
+                    }
+                }
+            }
+        ],
+        "n_nor_ethanol": 0.8
+    },
+    {
+        "n_id": 9,
+        "a_o_component": [
+            {
+                "o_scent": {
+                    "s_name": "Bergamottenminze",
+                    "s_desc": "Mentha citrata",
+                    "a_s_url_img": [
+                        "./images/bergamottenminze.jpeg"
+                    ],
+                    "n_gram_per_ml": 0.89
+                },
+                "n_nor": 1,
+                "_o_js": {
+                    "o_jsh": {
+                        "s_tag": "input",
+                        "type": "number",
+                        "min": 1,
+                        "max": 99,
+                        "step": 1,
+                        "value": "100.00"
+                    },
+                    "_o_html": {
+                        "s_tag": "input"
+                    }
+                }
+            }
+        ],
+        "n_nor_ethanol": 0.8
+    },
+    {
+        "n_id": null,
+        "a_o_component": [
+            {
+                "o_scent": {
+                    "s_name": "Bergamottenminze",
+                    "s_desc": "Mentha citrata",
+                    "a_s_url_img": [
+                        "./images/bergamottenminze.jpeg"
+                    ],
+                    "n_gram_per_ml": 0.89
+                },
+                "n_nor": 1,
+                "_o_js": {
+                    "o_jsh": {
+                        "s_tag": "input",
+                        "type": "number",
+                        "min": 1,
+                        "max": 99,
+                        "step": 1,
+                        "value": "100.00"
+                    },
+                    "_o_html": {
+                        "s_tag": "input"
+                    }
+                }
+            }
+        ],
+        "n_nor_ethanol": 0.8
+    },
+    {
+        "n_id": 7,
+        "a_o_component": [
+            {
+                "o_scent": {
+                    "s_name": "Bergamottenminze",
+                    "s_desc": "Mentha citrata",
+                    "a_s_url_img": [
+                        "./images/bergamottenminze.jpeg"
+                    ],
+                    "n_gram_per_ml": 0.89
+                },
+                "n_nor": 1,
+                "_o_js": {
+                    "o_jsh": {
+                        "s_tag": "input",
+                        "type": "number",
+                        "min": 1,
+                        "max": 99,
+                        "step": 1,
+                        "value": "100.00"
+                    },
+                    "_o_html": {
+                        "s_tag": "input"
+                    }
+                }
+            }
+        ],
+        "n_nor_ethanol": 0.8
+    },
+    {
+        "n_id": 6,
+        "a_o_component": [
+            {
+                "o_scent": {
+                    "s_name": "Bergamottenminze",
+                    "s_desc": "Mentha citrata",
+                    "a_s_url_img": [
+                        "./images/bergamottenminze.jpeg"
+                    ],
+                    "n_gram_per_ml": 0.89
+                },
+                "n_nor": 1,
+                "_o_js": {
+                    "o_jsh": {
+                        "s_tag": "input",
+                        "type": "number",
+                        "min": 1,
+                        "max": 99,
+                        "step": 1,
+                        "value": "100.00"
+                    },
+                    "_o_html": {
+                        "s_tag": "input"
+                    }
+                }
+            }
+        ],
+        "n_nor_ethanol": 0.8
+    },
+    {
+        "n_id": 5,
+        "a_o_component": [
+            {
+                "o_scent": {
+                    "s_name": "Bergamottenminze",
+                    "s_desc": "Mentha citrata",
+                    "a_s_url_img": [
+                        "./images/bergamottenminze.jpeg"
+                    ],
+                    "n_gram_per_ml": 0.89
+                },
+                "n_nor": 1,
+                "_o_js": {
+                    "o_jsh": {
+                        "s_tag": "input",
+                        "type": "number",
+                        "min": 1,
+                        "max": 99,
+                        "step": 1,
+                        "value": "100.00"
+                    },
+                    "_o_html": {
+                        "s_tag": "input"
+                    }
+                }
+            }
+        ],
+        "n_nor_ethanol": 0.8
+    }
+]
