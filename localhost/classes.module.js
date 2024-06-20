@@ -25,11 +25,13 @@ class O_scent{
     constructor(
         s_name,
         s_desc,
-        a_s_url_img
+        a_s_url_img, 
+        n_gram_per_ml
     ){
         this.s_name = s_name
         this.s_desc = s_desc
-        this.a_s_url_img = a_s_url_img
+        this.a_s_url_img = a_s_url_img, 
+        this.n_gram_per_ml = n_gram_per_ml
     }
 }
 
