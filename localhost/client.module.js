@@ -42,8 +42,10 @@ from 'https://deno.land/x/gpugateway@0.5/mod.js'
 
 import {
     f_n_idx_ensured_inside_array,
-    f_swap_in_array
-} from "https://deno.land/x/handyhelpers@4.0.4/mod.js"
+    f_swap_in_array,
+    f_a_n_nor_channelcolorrgba_from_color_hex,
+    f_s_color_hex_from_a_n_nor_channelcolorrgba
+} from "https://deno.land/x/handyhelpers@4.0.6/mod.js"
 
 import { 
     O_fragrance, 
@@ -70,6 +72,9 @@ o_variables.n_rem_font_size_base = 0.8 // adjust font size, other variables can 
 o_variables.n_rem_padding_interactive_elements = 0.5; // adjust padding for interactive elements 
 f_add_css(
     `
+    input[type="color"] {
+        padding: 0.2rem;
+    }
     .bgimg{
         aspect-ratio: 1.618;
         max-width: 10rem;
@@ -127,11 +132,156 @@ f_add_css(
 
 );
 
+let f_update_shader_uniform_locations = function(){
+
+    let o_gl = o_gpu_gateway.o_ctx;
+    // Get the location of the uniform array
+    o_state.o_uniform_location__a_o_component = o_gl.getUniformLocation(o_gpu_gateway.o_shader__program, 'a_o_component');
+    o_state.o_unfirom_location_a_o_vec4_col_a_o_component = o_gl.getUniformLocation(o_gpu_gateway.o_shader__program, 'a_o_vec4_col_a_o_component');
+
+    // Create the array of vec4 data (flattened into a single Float32Array)
+    let a_o_vec4__a_o_component = new Float32Array(
+        o_state.o_fragrance.a_o_component.length*4
+    );
+
+    o_state.a_o_vec4_col_a_o_component = new Float32Array(
+        o_state.o_fragrance.a_o_component.map(o=>{
+            return o.o_scent.a_n_channel_rgba_color
+        }).flat()
+    );
+
+    let n_nor = 0.;
+    for(let n_idx_a_o_component in o_state.o_fragrance.a_o_component){
+        let o_component = o_state.o_fragrance.a_o_component[n_idx_a_o_component];
+        let n_nor_start = n_nor;
+        n_nor+=o_component.n_nor;
+        let n_nor_end = n_nor;
+
+        a_o_vec4__a_o_component[n_idx_a_o_component*4+0] = n_nor_start;
+        a_o_vec4__a_o_component[n_idx_a_o_component*4+1] = n_nor_end;
+        // a_o_vec4__a_o_component[n_idx_a_o_component*4+2] = ;
+        // a_o_vec4__a_o_component[n_idx_a_o_component*4+3] = ;
+    }
+    o_gl.uniform4fv(o_state.o_uniform_location__a_o_component, a_o_vec4__a_o_component);
+    o_gl.uniform4fv(o_state.o_unfirom_location_a_o_vec4_col_a_o_component, o_state.a_o_vec4_col_a_o_component);
+
+
+    const o_uniform_location__n_len_a_o_component = o_gl.getUniformLocation(o_gpu_gateway.o_shader__program, 'n_len_a_o_component');
+    o_gl.uniform1f(o_uniform_location__n_len_a_o_component, o_state.o_fragrance.a_o_component.length); // Replace 1.0 with the float value you want to pass
+
+}
 
 let o_canvas = document.createElement('canvas');
 let o_gpu_gateway = null;
-let f_update_shader = function(){
+let f_update_shader = async function(){
 
+    let s_glsl_fragment = `#version 300 es
+    precision mediump float;
+    in vec2 ;
+    out vec4 fragColor;
+    uniform float n_ms_time;
+    uniform vec2 o_scl_canvas;
+    uniform vec4 a_o_trn[${n_len_a_o_trn}];
+
+    uniform float n_len_a_o_component;
+    uniform vec4 a_o_component[${o_state.o_fragrance.a_o_component.length}];
+    uniform vec4 a_o_vec4_col_a_o_component[${o_state.o_fragrance.a_o_component.length}];
+    ${o_state.o_fragrance.a_o_component.map((o, n_idx)=>{
+        return [
+            `//${o.o_scent.a_s_url_img[0]}`,
+            `uniform sampler2D o_texture_${n_idx};`
+
+        ].join('\n')
+    }).join('\n')}
+
+    float f_n_sdf_pie( 
+        vec2 p2, 
+        float n_ang_nor_start, 
+        float n_ang_nor_end, 
+        float r
+    )
+    {
+        //https://www.shadertoy.com/view/XXcSRs
+        float n_ang_nor = abs(n_ang_nor_start-n_ang_nor_end);
+        float n_tau = 6.2831;
+    
+        float n_ang_rot = (n_ang_nor_start + n_ang_nor/2.+.25)*n_tau;
+        vec2 p = mat2(
+            sin(n_ang_rot), -cos(n_ang_rot),
+            cos(n_ang_rot), sin(n_ang_rot)
+        )*p2;
+        vec2 c = vec2(sin(n_ang_nor/2.*n_tau), cos(n_ang_nor/2.*n_tau));
+        p.x = abs(p.x);
+        float l = length(p) - r;
+        float m = length(p - c*clamp(dot(p,c),0.0,r) );
+        return max(l,m*sign(c.y*p.x-c.x*p.y));
+    }
+
+    void main() {
+        float nt = n_ms_time *.001;
+        float n_dimension_smaller_canvas = min(o_scl_canvas.y, o_scl_canvas.x);
+        vec2 o_ratio_xy_canvas = vec2(1., o_scl_canvas.x/ o_scl_canvas.y);
+        vec2 o_trn_nor_pixel = (gl_FragCoord.xy - o_scl_canvas.xy*.5) / vec2(n_dimension_smaller_canvas);
+        vec2 o_trn_nor_from_zero = gl_FragCoord.xy / o_scl_canvas.xy;
+        vec2 o_trn_nor_pixel2 = vec2(o_trn_nor_pixel.x, 1.-o_trn_nor_pixel.y)+(o_ratio_xy_canvas.yx/2.);
+        float n_its = n_len_a_o_component;
+        float n_tau = 6.2831;
+        float n = 1.;
+        float n_radius = 0.4;
+        int n_idx_a_o_component = 0;
+        vec4 o_col = vec4(0);
+        float n_max = 0.;
+        for(float n_it_nor = 0.; n_it_nor < 1.; n_it_nor +=(1./n_its)){
+            
+            vec4 o_component = a_o_component[n_idx_a_o_component];
+            vec4 o_vec4_col_a_o_component = a_o_vec4_col_a_o_component[n_idx_a_o_component];
+
+            float n_ang = n_tau * n_it_nor;
+            float n2 = f_n_sdf_pie(
+                o_trn_nor_pixel,
+                o_component[0],
+                o_component[1],
+                n_radius
+            );
+            float n_nor_ang_between = 
+            min(
+                o_component[0],
+                o_component[1]
+            )+
+            ((
+                o_component[0]
+                +o_component[1]
+            )/2.);
+            vec2 o_segment_center = (vec2(
+                sin(n_nor_ang_between*n_tau),
+                cos(n_nor_ang_between*n_tau)
+            )*n_radius
+            
+            );
+            float n_inside = smoothstep(0.01, 0.0,n2);
+            n2 = pow(n2, 1./3.)*3.;
+            n2 = clamp(n2, 0., 1.);
+            o_col += o_vec4_col_a_o_component*(1.-n2);
+            ${o_state.o_fragrance.a_o_component.map((o,n_idx)=>{
+                return `if(n_idx_a_o_component == ${n_idx}){
+                    o_col += n_inside*texture(o_texture_${n_idx}, 
+                        o_trn_nor_pixel2
+                        //+ o_segment_center
+                    );
+                }`
+            }).join('\n')}
+
+            n_idx_a_o_component+=1;
+
+        }
+
+
+        fragColor = vec4(o_col.rgb,1.);
+        // vec4 o = texture(o_texture_2, o_trn_nor_from_zero);
+
+    }
+    `;
+    console.log(s_glsl_fragment)
     o_gpu_gateway = f_o_gpu_gateway(
         o_canvas, 
         `#version 300 es
@@ -139,55 +289,19 @@ let f_update_shader = function(){
         void main() {
             gl_Position = a_o_vec_position_vertex;
         }`,
-        `#version 300 es
-        precision mediump float;
-        in vec2 ;
-        out vec4 fragColor;
-        uniform float n_ms_time;
-        uniform vec2 o_scl_canvas;
-        uniform vec4 a_o_trn[${n_len_a_o_trn}];
-        ${o_state.o_fragrance.a_o_component.map((o, n_idx)=>{
-            return `uniform sampler2D o_texture_${n_idx};`
-        }).join('\n')}
-
-        void main() {
-            float nt = n_ms_time *.001;
-            vec2 o_trn_nor_pixel = (gl_FragCoord.xy - o_scl_canvas.xy*.5) / o_scl_canvas.xy;
-            float n_tau = 6.2831;
-
-            float n_its = 3.;
-            float n_prod = 1.;
-            for(float n_it_nor = 0.0; n_it_nor < 1.0; n_it_nor +=(1./n_its)){
-                n_prod*= (sin(length(
-                    o_trn_nor_pixel
-                    - (vec2(
-                        sin(n_it_nor*n_tau),
-                        cos(n_it_nor*n_tau)
-                    ))*.5
-                )*33.+nt));
-                //n_prod = pow(n_prod, 2./3.);
-            }
-
-            vec3 o_col = vec3(
-                sin((n_prod)*1.-0.33+nt)*.5+.5,
-                sin((n_prod)*1.+0.0+nt)*.5+.5,
-                sin((n_prod)*1.+0.33+nt)*.5+.5
-            );
-            // o_col = vec3(length(o_trn_nor_pixel));
-            fragColor = vec4(o_col,1.);
-            // fragColor = vec4(1.);
-        }
-        `,
+        s_glsl_fragment
     )
+    let o_gl = o_gpu_gateway.o_ctx
     var a_o_trn = new Float32Array(new Array(n_len_a_o_trn*4).fill(0));
-    var buffer = o_gpu_gateway.o_ctx.createBuffer();
-    o_gpu_gateway.o_ctx.bindBuffer(o_gpu_gateway.o_ctx.ARRAY_BUFFER, buffer);
-    o_gpu_gateway.o_ctx.bufferData(o_gpu_gateway.o_ctx.ARRAY_BUFFER, a_o_trn, o_gpu_gateway.o_ctx.STATIC_DRAW);
-    var o_location_a_o_trn = o_gpu_gateway.o_ctx.getUniformLocation(o_gpu_gateway.o_shader__program, 'a_o_trn');
-    o_gpu_gateway.o_ctx.uniform4fv(o_location_a_o_trn, a_o_trn);
+    var buffer = o_gl.createBuffer();
+    o_gl.bindBuffer(o_gl.ARRAY_BUFFER, buffer);
+    o_gl.bufferData(o_gl.ARRAY_BUFFER, a_o_trn, o_gl.STATIC_DRAW);
+    var o_location_a_o_trn = o_gl.getUniformLocation(o_gpu_gateway.o_shader__program, 'a_o_trn');
+    o_gl.uniform4fv(o_location_a_o_trn, a_o_trn);
 
+    f_update_shader_uniform_locations();
 
-
+    // let o_img = f_o_img_from_s_url()
     // const colorBuffer = gl.createBuffer();
     // gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
     // const colors = new Float32Array([
@@ -203,33 +317,59 @@ let f_update_shader = function(){
     // const indices = new Uint16Array([0, 1, 2, 1, 2, 3]);
     // gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
 
-    // for(let o_component of o_state.o_fragrance.a_o_component){
-        
-        
-    //             const image = new Image();
-    //             image.crossOrigin = "anonymous"; // This is important if the image is hosted on a different domain
-    //             image.onload = function() {
-    //                 gl.bindTexture(gl.TEXTURE_2D, texture);
-    //                 gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-        
-    //                 // Check if the image is a power of 2 in both dimensions
-    //                 if ((image.width & (image.width - 1)) === 0 && (image.height & (image.height - 1)) === 0) {
-    //                     // Yes, it's a power of 2. Generate mips.
-    //                     gl.generateMipmap(gl.TEXTURE_2D);
-    //                 } else {
-    //                     // No, it's not a power of 2. Turn off mips and set wrapping to clamp to edge
-    //                     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    //                     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    //                     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    //                 }
-        
-    //                 // Draw the scene
-    //                 drawScene();
-    //             };
-        
-    //         })]
+    console.log(o_state.o_fragrance.a_o_component)
+    // debugger
+    let n_idx_a_o_img = 0;
 
-    // }
+    function isPowerOf2(value) {
+        return (value & (value - 1)) == 0;
+    }
+    const level = 0;
+    const internalFormat = o_gl.RGBA;
+    const srcFormat = o_gl.RGBA;
+    const srcType = o_gl.UNSIGNED_BYTE;
+
+    for(let o_component of o_state.o_fragrance.a_o_component){
+        
+            let o_img = await f_o_img_from_s_url(o_component.o_scent.a_s_url_img[0]);
+
+            const s_name = `o_texture_${n_idx_a_o_img}`;
+
+            const o_texture = o_gl.createTexture();
+            o_gl.bindTexture(o_gl.TEXTURE_2D, o_texture);
+            o_gl.texImage2D(o_gl.TEXTURE_2D, level, internalFormat, srcFormat, srcType, o_img.o_js_iamge_object);
+
+
+            // Check if the image is a power of two in both dimensions.
+            if (isPowerOf2(o_img.o_js_iamge_object.width) && isPowerOf2(o_img.o_js_iamge_object.height)) {
+                // Yes, it's a power of two. Generate mips.
+                o_gl.generateMipmap(o_gl.TEXTURE_2D);
+            } else {
+                // No, it's not a power of two. Turn off mips and set wrapping to clamp to edge
+                o_gl.texParameteri(o_gl.TEXTURE_2D, o_gl.TEXTURE_WRAP_S, o_gl.CLAMP_TO_EDGE);
+                o_gl.texParameteri(o_gl.TEXTURE_2D, o_gl.TEXTURE_WRAP_T, o_gl.CLAMP_TO_EDGE);
+                o_gl.texParameteri(o_gl.TEXTURE_2D, o_gl.TEXTURE_MIN_FILTER, o_gl.LINEAR);
+            }
+            
+            // Because video texture size is not power of 2 in both dimensions,
+            // set the parameters so we don't need a power of 2 size
+            // o_gl.texParameteri(o_gl.TEXTURE_2D, o_gl.TEXTURE_WRAP_S, o_gl.CLAMP_TO_EDGE);
+            // o_gl.texParameteri(o_gl.TEXTURE_2D, o_gl.TEXTURE_WRAP_T, o_gl.CLAMP_TO_EDGE);
+            // o_gl.texParameteri(o_gl.TEXTURE_2D, o_gl.TEXTURE_MIN_FILTER, o_gl.LINEAR);
+            // o_gl.texParameteri(o_gl.TEXTURE_2D, o_gl.TEXTURE_MAG_FILTER, o_gl.LINEAR);
+        
+    
+            // Get the location of the uniform sampler in the shader program
+            const o_locaion = o_gl.getUniformLocation(o_gpu_gateway.o_shader__program, s_name);
+
+            // Activate a texture unit
+            o_gl.activeTexture(o_gl.TEXTURE0 + n_idx_a_o_img);
+            // Set the sampler uniform to the current texture unit index
+            o_gl.uniform1i(o_locaion, n_idx_a_o_img);
+
+            n_idx_a_o_img+=1
+            
+    }
 
 }
 
@@ -334,6 +474,10 @@ let f_timeouttry_update_server_data = async function(){
 }
 
 let o_state = {
+    o_uniform_location__a_o_component: null,
+    a_o_vec4__a_o_component: new Float32Array(), 
+    o_unfirom_location_a_o_vec4_col_a_o_component: null,
+    a_o_vec4_col_a_o_component: new Float32Array(),
     b_display_a_o_scent: false,
     a_o_img: [],
     o_state__o_notifire,
@@ -375,6 +519,14 @@ let o_state = {
 
 }
 
+// // update the references
+// for(let o_fragrance of o_state.a_o_fragrance){
+//     o_fragrance.a_o_component.map(o=>{
+//         o.o_scent = o_state.a_o_scent.find(o2=>{
+//             return o2.s_name == o.o_scent.s_name
+//         })
+//     })
+// }
 
 let n_id_raf = 0;
 let f_raf = function(){
@@ -541,17 +693,20 @@ document.body.appendChild(
                                                         o_state.a_o_scent.map(o_scent=>{
                                                             return {
                                                                 class: "o_scent", 
+                                                                style: [
+                                                                    'display:flex'
+                                                                ].join(';'),
                                                                 a_o: [
                                                                     {
                                                                         s_tag: 'input', 
-                                                                        innerText: o_scent.s_name, 
+                                                                        value: o_scent.s_name, 
                                                                         oninput: (o_e)=>{
                                                                             o_scent.s_name = o_e.target.value();
                                                                         }
                                                                     }, 
                                                                     {
                                                                         s_tag: 'input', 
-                                                                        innerText: o_scent.s_desc, 
+                                                                        value: o_scent.s_desc, 
                                                                         oninput: (o_e)=>{
                                                                             o_scent.s_name = o_e.target.value();
                                                                         }
@@ -562,15 +717,51 @@ document.body.appendChild(
                                                                     // n_gram_per_ml
                                                                     // a_n_channel_rgba_color 
                                                                     {
+                                                                        s_tag: 'input', 
+                                                                        type: "color", 
+                                                                        value: f_s_color_hex_from_a_n_nor_channelcolorrgba(
+                                                                            o_scent.a_n_channel_rgba_color
+                                                                        ),
+                                                                        oninput: (o_e)=>{
+                                                                            o_scent.a_n_channel_rgba_color = f_a_n_nor_channelcolorrgba_from_color_hex(
+                                                                                o_e.target.value
+                                                                            );
+                                                                            console.log(o_scent.a_n_channel_rgba_color)
+                                                                            f_timeouttry_update_server_data()
+
+                                                                        }
+                                                                    },
+                                                                    {
                                                                         a_o: [
                                                                             o_scent.a_s_url_img.map((s_url_img, n_idx_a_s_url_img) =>{
                                                                                 return {
                                                                                     a_o: [
                                                                                         {
-                                                                                            s_tag: "input", 
-                                                                                            style:[
-                                                                                                `background-image:url(${s_url_img})`
-                                                                                            ].join(';')
+                                                                                            f_o_jsh:()=>{
+                                                                                                return {
+                                                                                                    s_tag: "input", 
+                                                                                                    value: s_url_img,
+                                                                                                    oninput: async (o_e, o2)=>{
+                                                                                                        let s = o_e.target.value
+                                                                                                        try {
+                                                                                                            let o_url = new URL(s);
+                                                                                                            o_scent.a_s_url_img[n_idx_a_s_url_img] = s
+                                                                                                            await o2._f_update();
+                                                                                                            return true;
+                                                                                                        } catch (e) {
+                                                                                                            console.log(o2)
+                                                                                                            console.log(e)
+                                                                                                            f_o_throw_notification(o_state.o_state__o_notifire,`"${s}" is not a valid url`, 'error')
+                                                                                                            return false;
+                                                                                                        }
+                                                                                                    },
+                                                                                                    style:[
+                                                                                                        `background-position:center`,
+                                                                                                        `background-size: cover`,
+                                                                                                        `background-image:url(${s_url_img})`
+                                                                                                    ].join(';')
+                                                                                                }
+                                                                                            }
                                                                                         }, 
                                                                                         {
                                                                                             s_tag: "button", 
@@ -588,8 +779,9 @@ document.body.appendChild(
                                                                             {
                                                                                 s_tag: "button", 
                                                                                 innerText: "add url", 
-                                                                                onclick: ()=>{
+                                                                                onclick: async ()=>{
                                                                                     o_scent.a_s_url_img.push('url_here')
+                                                                                    o_state.o_js__viewselection._f_render();
                                                                                 }
                                                                             }
                                                                         ]
@@ -654,7 +846,7 @@ document.body.appendChild(
                                                                                             o_state.a_o_fragrance.push(o_fragrance_existing)
                                                                                         }
                                                                                         o_state.o_fragrance = o_fragrance_existing
-                                                                                        f_update_shader();
+                                                                                        await f_update_shader();
                                                                                         await o_state.o_js__a_o_component._f_render();
                                                                                     }
                                                                                 }
@@ -739,8 +931,9 @@ document.body.appendChild(
                                                                                                                                                 }
                                                                                                                                             )
                                                 
-                                                                                                                                        );
-                                                
+                                                                                                                                            );
+                                                                                                                                            f_update_shader_uniform_locations()
+                                                                                                                                            
                                                                                                                                     },10);
                                                 
                                                                                                                                 }
@@ -886,7 +1079,7 @@ document.body.appendChild(
                                                                 ).o_js__a_o_component,
 
                                                                 {
-                                                                    style: "display:flex;flex-direction:column",
+                                                                    style: "display:flex;flex-direction:column; flex:1",
                                                                     a_o: [
 
                                                                         {
@@ -1050,5 +1243,5 @@ await o_state.o_js__nr._f_render();
 
 await f_timeouttry_update_server_data();
 
-f_update_shader();  
+await f_update_shader();  
 f_resize()
