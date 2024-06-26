@@ -123,6 +123,15 @@ f_add_css(
         flex-direction: column;
         justify-content:flex-end;
     }
+    .app > div{
+        flex:1;
+    }
+    .viewselection,
+    .a_o_scent,
+    .o_fragrance{
+        display:flex;
+        flex:1;
+    }
     ${
         f_s_css_from_o_variables(
             o_variables
@@ -169,12 +178,32 @@ let f_update_shader_uniform_locations = function(){
     const o_uniform_location__n_len_a_o_component = o_gl.getUniformLocation(o_gpu_gateway.o_shader__program, 'n_len_a_o_component');
     o_gl.uniform1f(o_uniform_location__n_len_a_o_component, o_state.o_fragrance.a_o_component.length); // Replace 1.0 with the float value you want to pass
 
+    f_resize();
 }
 
 let o_canvas = document.createElement('canvas');
 let o_gpu_gateway = null;
+
+function deleteWebGLProgram(gl, program) {
+    // Get the attached shaders
+    const attachedShaders = gl.getAttachedShaders(program);
+
+    // Detach and delete each shader
+    attachedShaders.forEach(shader => {
+        gl.detachShader(program, shader);
+        gl.deleteShader(shader);
+    });
+
+    // Delete the program
+    gl.deleteProgram(program);
+}
+
 let f_update_shader = async function(){
 
+    debugger
+    if(o_gpu_gateway){
+        deleteWebGLProgram(o_gpu_gateway.o_ctx, o_gpu_gateway.o_shader__program)
+    }
     let s_glsl_fragment = `#version 300 es
     precision mediump float;
     in vec2 ;
@@ -220,10 +249,13 @@ let f_update_shader = async function(){
     void main() {
         float nt = n_ms_time *.001;
         float n_dimension_smaller_canvas = min(o_scl_canvas.y, o_scl_canvas.x);
+        float n_dimension_bigger_canvas = max(o_scl_canvas.y, o_scl_canvas.x);
+        float n_ratio_smaller_to_bigger = n_dimension_smaller_canvas/n_dimension_bigger_canvas;
         vec2 o_ratio_xy_canvas = vec2(1., o_scl_canvas.x/ o_scl_canvas.y);
         vec2 o_trn_nor_pixel = (gl_FragCoord.xy - o_scl_canvas.xy*.5) / vec2(n_dimension_smaller_canvas);
         vec2 o_trn_nor_from_zero = gl_FragCoord.xy / o_scl_canvas.xy;
-        vec2 o_trn_nor_pixel2 = vec2(o_trn_nor_pixel.x, 1.-o_trn_nor_pixel.y)+(o_ratio_xy_canvas.yx/2.);
+        vec2 o_trn_nor_pixel2 = o_trn_nor_pixel+.5;
+        o_trn_nor_pixel2.y = 1.-o_trn_nor_pixel2.y;
         float n_its = n_len_a_o_component;
         float n_tau = 6.2831;
         float n = 1.;
@@ -244,41 +276,49 @@ let f_update_shader = async function(){
                 n_radius
             );
             float n_nor_ang_between = 
+            
             min(
                 o_component[0],
                 o_component[1]
             )+
-            ((
+            (abs(
                 o_component[0]
-                +o_component[1]
+                -o_component[1]
             )/2.);
+            n_nor_ang_between = 1.-n_nor_ang_between;
             vec2 o_segment_center = (vec2(
                 sin(n_nor_ang_between*n_tau),
                 cos(n_nor_ang_between*n_tau)
-            )*n_radius
+            )*(n_radius/2.)
             
             );
             float n_inside = smoothstep(0.01, 0.0,n2);
-            n2 = pow(n2, 1./3.)*3.;
+            n2 = pow(n2, 1./3.)*2.;
             n2 = clamp(n2, 0., 1.);
-            o_col += o_vec4_col_a_o_component*(1.-n2);
+            //o_col += vec4(clamp(1.-pow(abs(length((o_trn_nor_pixel-o_segment_center)*(5.+n_it_nor*10.))-.5)*5., 1./12.)*1.2,0., 1.));
+            //o_col += o_vec4_col_a_o_component*(1.-n2);
             ${o_state.o_fragrance.a_o_component.map((o,n_idx)=>{
                 return `if(n_idx_a_o_component == ${n_idx}){
-                    o_col += n_inside*texture(o_texture_${n_idx}, 
+                    o_col += 
+                    n_inside
+                    *
+                    texture(o_texture_${n_idx}, 
+                    // texture(o_texture_2, 
                         o_trn_nor_pixel2
-                        //+ o_segment_center
+                        +o_segment_center
                     );
                 }`
             }).join('\n')}
 
+            // break;
             n_idx_a_o_component+=1;
 
         }
 
 
         fragColor = vec4(o_col.rgb,1.);
-        // vec4 o = texture(o_texture_2, o_trn_nor_from_zero);
-
+        // vec4 o = texture(o_texture_2, o_trn_nor_pixel2);
+        // fragColor = o;
     }
     `;
     console.log(s_glsl_fragment)
@@ -319,7 +359,6 @@ let f_update_shader = async function(){
 
     console.log(o_state.o_fragrance.a_o_component)
     // debugger
-    let n_idx_a_o_img = 0;
 
     function isPowerOf2(value) {
         return (value & (value - 1)) == 0;
@@ -329,19 +368,32 @@ let f_update_shader = async function(){
     const srcFormat = o_gl.RGBA;
     const srcType = o_gl.UNSIGNED_BYTE;
 
-    for(let o_component of o_state.o_fragrance.a_o_component){
-        
-            let o_img = await f_o_img_from_s_url(o_component.o_scent.a_s_url_img[0]);
+    for(let n_idx_a_o_component in o_state.o_fragrance.a_o_component){
+        n_idx_a_o_component = parseInt(n_idx_a_o_component);
+        let o_component = o_state.o_fragrance.a_o_component[n_idx_a_o_component];
+        let s = o_component.o_scent.a_s_url_img[0]
 
-            const s_name = `o_texture_${n_idx_a_o_img}`;
+        let o_img = await f_o_img_from_s_url(
+            s
+        )
+            console.log(o_component.o_scent.a_s_url_img[0]);
+        // document.body.appendChild(o_img.o_js_image_object);
+        // debugger
+            // console.log(n_idx_a_o_component)
+            // console.log(o_img)
+            
+
+            const s_name = `o_texture_${n_idx_a_o_component}`;
+            console.log(s_name)
 
             const o_texture = o_gl.createTexture();
             o_gl.bindTexture(o_gl.TEXTURE_2D, o_texture);
-            o_gl.texImage2D(o_gl.TEXTURE_2D, level, internalFormat, srcFormat, srcType, o_img.o_js_iamge_object);
+
+            o_gl.texImage2D(o_gl.TEXTURE_2D, level, internalFormat, srcFormat, srcType, o_img.o_js_image_object);
 
 
             // Check if the image is a power of two in both dimensions.
-            if (isPowerOf2(o_img.o_js_iamge_object.width) && isPowerOf2(o_img.o_js_iamge_object.height)) {
+            if (isPowerOf2(o_img.o_js_image_object.width) && isPowerOf2(o_img.o_js_image_object.height)) {
                 // Yes, it's a power of two. Generate mips.
                 o_gl.generateMipmap(o_gl.TEXTURE_2D);
             } else {
@@ -350,24 +402,21 @@ let f_update_shader = async function(){
                 o_gl.texParameteri(o_gl.TEXTURE_2D, o_gl.TEXTURE_WRAP_T, o_gl.CLAMP_TO_EDGE);
                 o_gl.texParameteri(o_gl.TEXTURE_2D, o_gl.TEXTURE_MIN_FILTER, o_gl.LINEAR);
             }
-            
-            // Because video texture size is not power of 2 in both dimensions,
-            // set the parameters so we don't need a power of 2 size
-            // o_gl.texParameteri(o_gl.TEXTURE_2D, o_gl.TEXTURE_WRAP_S, o_gl.CLAMP_TO_EDGE);
-            // o_gl.texParameteri(o_gl.TEXTURE_2D, o_gl.TEXTURE_WRAP_T, o_gl.CLAMP_TO_EDGE);
-            // o_gl.texParameteri(o_gl.TEXTURE_2D, o_gl.TEXTURE_MIN_FILTER, o_gl.LINEAR);
-            // o_gl.texParameteri(o_gl.TEXTURE_2D, o_gl.TEXTURE_MAG_FILTER, o_gl.LINEAR);
+
         
     
             // Get the location of the uniform sampler in the shader program
             const o_locaion = o_gl.getUniformLocation(o_gpu_gateway.o_shader__program, s_name);
 
             // Activate a texture unit
-            o_gl.activeTexture(o_gl.TEXTURE0 + n_idx_a_o_img);
-            // Set the sampler uniform to the current texture unit index
-            o_gl.uniform1i(o_locaion, n_idx_a_o_img);
+            o_gl.activeTexture(o_gl.TEXTURE0 + (n_idx_a_o_component));
 
-            n_idx_a_o_img+=1
+            o_gl.bindTexture(o_gl.TEXTURE_2D, o_texture);
+
+            // Set the sampler uniform to the current texture unit index
+            o_gl.uniform1i(o_locaion, n_idx_a_o_component);
+
+            n_idx_a_o_component+=1
             
     }
 
@@ -598,24 +647,26 @@ let f_o_img_from_s_url = async function(
         return o.s_url == s_url
     });
     if(o_img_existing && !b_force_update){
+        console.log('found')
         return o_img_existing
     }
     
     return new Promise((f_res, f_rej)=>{
-        const o_js_iamge_object = new Image();
-        o_js_iamge_object.crossOrigin = "anonymous"; // This is important if the image is hosted on a different domain
-        o_js_iamge_object.onload = function() {
+        const o_js_image_object = new Image();
+        o_js_image_object.crossOrigin = "anonymous"; // This is important if the image is hosted on a different domain
+        o_js_image_object.onload = function() {
             let o = new O_img(
                 s_url, 
-                o_js_iamge_object
+                o_js_image_object
             );
-            console.log(o)
+            // console.log(o)
+            o_state.a_o_img.push(o);
             return f_res(
                 o
             )
         };
-        o_js_iamge_object.onerror = (o_err)=>{return f_rej(o_err)}
-        o_js_iamge_object.src = s_url
+        o_js_image_object.onerror = (o_err)=>{return f_rej(o_err)}
+        o_js_image_object.src = s_url
     })
 
 }
@@ -624,10 +675,10 @@ let f_update_a_o_img = async function(){
         let o = o_scent.a_s_url_img.map(s=>{
             return f_o_img_from_s_url(s);
         });
-        console.log(o)
+        // console.log(o)
         return o
     }).flat()
-    console.log(a);
+    // console.log(a);
 
     return Promise.all(a)
 }
@@ -667,6 +718,7 @@ document.body.appendChild(
                         o_js__viewselection: {
                             f_o_jsh: ()=>{
                                 return {
+                                    class: "viewselection",
                                     a_o: [
                                         {
                                             s_tag: 'button', 
@@ -685,530 +737,532 @@ document.body.appendChild(
                                             }
                                         },
                                         {
-                                            a_o: [
-                                                {
-                                                    b_render: o_state.b_display_a_o_scent,
-                                                    class: "a_o_scent", 
-                                                    a_o: [
-                                                        o_state.a_o_scent.map(o_scent=>{
-                                                            return {
-                                                                class: "o_scent", 
-                                                                style: [
-                                                                    'display:flex'
-                                                                ].join(';'),
-                                                                a_o: [
-                                                                    {
-                                                                        s_tag: 'input', 
-                                                                        value: o_scent.s_name, 
-                                                                        oninput: (o_e)=>{
-                                                                            o_scent.s_name = o_e.target.value();
-                                                                        }
-                                                                    }, 
-                                                                    {
-                                                                        s_tag: 'input', 
-                                                                        value: o_scent.s_desc, 
-                                                                        oninput: (o_e)=>{
-                                                                            o_scent.s_name = o_e.target.value();
-                                                                        }
-                                                                    },
-                                                                    // s_name
-                                                                    // s_desc
-                                                                    // a_s_url_img
-                                                                    // n_gram_per_ml
-                                                                    // a_n_channel_rgba_color 
-                                                                    {
-                                                                        s_tag: 'input', 
-                                                                        type: "color", 
-                                                                        value: f_s_color_hex_from_a_n_nor_channelcolorrgba(
-                                                                            o_scent.a_n_channel_rgba_color
-                                                                        ),
-                                                                        oninput: (o_e)=>{
-                                                                            o_scent.a_n_channel_rgba_color = f_a_n_nor_channelcolorrgba_from_color_hex(
-                                                                                o_e.target.value
-                                                                            );
-                                                                            console.log(o_scent.a_n_channel_rgba_color)
-                                                                            f_timeouttry_update_server_data()
 
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        a_o: [
-                                                                            o_scent.a_s_url_img.map((s_url_img, n_idx_a_s_url_img) =>{
-                                                                                return {
-                                                                                    a_o: [
-                                                                                        {
-                                                                                            f_o_jsh:()=>{
-                                                                                                return {
-                                                                                                    s_tag: "input", 
-                                                                                                    value: s_url_img,
-                                                                                                    oninput: async (o_e, o2)=>{
-                                                                                                        let s = o_e.target.value
-                                                                                                        try {
-                                                                                                            let o_url = new URL(s);
-                                                                                                            o_scent.a_s_url_img[n_idx_a_s_url_img] = s
-                                                                                                            await o2._f_update();
-                                                                                                            return true;
-                                                                                                        } catch (e) {
-                                                                                                            console.log(o2)
-                                                                                                            console.log(e)
-                                                                                                            f_o_throw_notification(o_state.o_state__o_notifire,`"${s}" is not a valid url`, 'error')
-                                                                                                            return false;
-                                                                                                        }
-                                                                                                    },
-                                                                                                    style:[
-                                                                                                        `background-position:center`,
-                                                                                                        `background-size: cover`,
-                                                                                                        `background-image:url(${s_url_img})`
-                                                                                                    ].join(';')
+                                            b_render: o_state.b_display_a_o_scent,
+                                            class: "a_o_scent", 
+                                            a_o: [
+                                                o_state.a_o_scent.map(o_scent=>{
+                                                    return {
+                                                        class: "o_scent", 
+                                                        style: [
+                                                            'display:flex'
+                                                        ].join(';'),
+                                                        a_o: [
+                                                            {
+                                                                s_tag: 'input', 
+                                                                value: o_scent.s_name, 
+                                                                oninput: (o_e)=>{
+                                                                    o_scent.s_name = o_e.target.value();
+                                                                }
+                                                            }, 
+                                                            {
+                                                                s_tag: 'input', 
+                                                                value: o_scent.s_desc, 
+                                                                oninput: (o_e)=>{
+                                                                    o_scent.s_name = o_e.target.value();
+                                                                }
+                                                            },
+                                                            // s_name
+                                                            // s_desc
+                                                            // a_s_url_img
+                                                            // n_gram_per_ml
+                                                            // a_n_channel_rgba_color 
+                                                            {
+                                                                s_tag: 'input', 
+                                                                type: "color", 
+                                                                value: f_s_color_hex_from_a_n_nor_channelcolorrgba(
+                                                                    o_scent.a_n_channel_rgba_color
+                                                                ),
+                                                                oninput: (o_e)=>{
+                                                                    o_scent.a_n_channel_rgba_color = f_a_n_nor_channelcolorrgba_from_color_hex(
+                                                                        o_e.target.value
+                                                                    );
+                                                                    console.log(o_scent.a_n_channel_rgba_color)
+                                                                    f_timeouttry_update_server_data()
+
+                                                                }
+                                                            },
+                                                            {
+                                                                a_o: [
+                                                                    o_scent.a_s_url_img.map((s_url_img, n_idx_a_s_url_img) =>{
+                                                                        return {
+                                                                            a_o: [
+                                                                                {
+                                                                                    f_o_jsh:()=>{
+                                                                                        return {
+                                                                                            s_tag: "input", 
+                                                                                            value: s_url_img,
+                                                                                            oninput: async (o_e, o2)=>{
+                                                                                                let s = o_e.target.value
+                                                                                                try {
+                                                                                                    let o_url = new URL(s);
+                                                                                                    o_scent.a_s_url_img[n_idx_a_s_url_img] = s
+                                                                                                    await o2._f_update();
+                                                                                                    return true;
+                                                                                                } catch (e) {
+                                                                                                    console.log(o2)
+                                                                                                    console.log(e)
+                                                                                                    f_o_throw_notification(o_state.o_state__o_notifire,`"${s}" is not a valid url`, 'error')
+                                                                                                    return false;
                                                                                                 }
-                                                                                            }
-                                                                                        }, 
-                                                                                        {
-                                                                                            s_tag: "button", 
-                                                                                            innerText: "remove", 
-                                                                                            onpointerdown: ()=>{
-                                                                                                o_scent.a_s_url_img = o_scent.a_s_url_img.filter(s=>{
-                                                                                                    return s!=s_url_img
-                                                                                                });
-                                                                                            }
+                                                                                            },
+                                                                                            style:[
+                                                                                                `background-position:center`,
+                                                                                                `background-size: cover`,
+                                                                                                `background-image:url(${s_url_img})`
+                                                                                            ].join(';')
                                                                                         }
-                                                                                    ]
-                                                                                    
+                                                                                    }
+                                                                                }, 
+                                                                                {
+                                                                                    s_tag: "button", 
+                                                                                    innerText: "remove", 
+                                                                                    onpointerdown: ()=>{
+                                                                                        o_scent.a_s_url_img = o_scent.a_s_url_img.filter(s=>{
+                                                                                            return s!=s_url_img
+                                                                                        });
+                                                                                    }
                                                                                 }
-                                                                            }), 
-                                                                            {
-                                                                                s_tag: "button", 
-                                                                                innerText: "add url", 
-                                                                                onclick: async ()=>{
-                                                                                    o_scent.a_s_url_img.push('url_here')
-                                                                                    o_state.o_js__viewselection._f_render();
-                                                                                }
-                                                                            }
-                                                                        ]
-                                                                    },
+                                                                            ]
+                                                                            
+                                                                        }
+                                                                    }), 
                                                                     {
-                                                                        s_tag: 'input', 
-                                                                        innerText: o_scent.a, 
-                                                                        oninput: (o_e)=>{
-                                                                            o_scent.s_name = o_e.target.value();
+                                                                        s_tag: "button", 
+                                                                        innerText: "add url", 
+                                                                        onclick: async ()=>{
+                                                                            o_scent.a_s_url_img.push('url_here')
+                                                                            o_state.o_js__viewselection._f_render();
                                                                         }
                                                                     }
                                                                 ]
+                                                            },
+                                                            {
+                                                                s_tag: 'input', 
+                                                                innerText: o_scent.a, 
+                                                                oninput: (o_e)=>{
+                                                                    o_scent.s_name = o_e.target.value();
+                                                                }
                                                             }
-                                                        })
-                                                    ]
-                                                },
-                                                
+                                                        ]
+                                                    }
+                                                })
+                                            ]
+                                        },
+                                        {
+                                            b_render: !o_state.b_display_a_o_scent,
+                                            class: "o_fragrance", 
+                                            style: 'display:flex;flex-direction:column',
+                                            a_o: [
+                                                Object.assign(
+                                                    o_state, 
+                                                    {
+                                                        o_js__nr: {
+                                                            f_o_jsh: ()=>{
+                                                                return {
+                                                                    class: "top",
+                                                                    a_o: [
+                                                                        {
+                                                                            s_tag: "h1",
+                                                                            innerText: "NR." 
+                                                                        },
+                                                                        {
+                                                                            s_tag: "input", 
+                                                                            type:"number",
+                                                                            value: o_state?.o_fragrance?.n_id, 
+                                                                            oninput: async (o_e)=>{
+                                                                                let n_id = parseInt(o_e.target.value)
+                                                                                if(n_id <=1 || isNaN(n_id)){
+                                                                                    await f_o_throw_notification(o_state__o_notifire, 'number must be >=1', 'warning');
+                                
+                                                                                    return 
+                                                                                }
+                                                                                let o_fragrance_existing = o_state.a_o_fragrance.find(
+                                                                                    o=>{
+                                                                                        return o.n_id == n_id
+                                                                                    }
+                                                                                );
+                                                                                if(!o_fragrance_existing){
+                                                                                    o_fragrance_existing = new O_fragrance(
+                                                                                        n_id, 
+                                                                                        [
+                                                                                            new O_component(
+                                                                                                o_mod_autogenerated.o_scent__bergamottenminze, 
+                                                                                                1.0
+                                                                                            )
+                                                                                        ], 
+                                                                                        0.8
+                                                                                    )
+                                                                                    o_state.a_o_fragrance.push(o_fragrance_existing)
+                                                                                }
+                                                                                o_state.o_fragrance = o_fragrance_existing
+                                                                                await f_update_shader();
+                                                                                await o_state.o_js__a_o_component._f_render();
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                ).o_js__nr,
                                                 {
-                                                    b_render: !o_state.b_display_a_o_scent,
-                                                    class: "o_fragrance", 
-                                                    style: 'display:flex;flex-direction:column',
+
+                                                    style: [
+                                                        "display:flex", 
+                                                        'flex:1'
+                                                    ].join(';\n'),
                                                     a_o: [
+                                                        
                                                         Object.assign(
                                                             o_state, 
                                                             {
-                                                                o_js__nr: {
+                                                                o_js__a_o_component: {
                                                                     f_o_jsh: ()=>{
+                                        
+                                        
                                                                         return {
-                                                                            class: "top",
+                                                                            class: "a_o_msg",
                                                                             a_o: [
                                                                                 {
-                                                                                    s_tag: "h1",
-                                                                                    innerText: "NR." 
-                                                                                },
-                                                                                {
-                                                                                    s_tag: "input", 
-                                                                                    type:"number",
-                                                                                    value: o_state?.o_fragrance?.n_id, 
-                                                                                    oninput: async (o_e)=>{
-                                                                                        let n_id = parseInt(o_e.target.value)
-                                                                                        if(n_id <=1 || isNaN(n_id)){
-                                                                                            await f_o_throw_notification(o_state__o_notifire, 'number must be >=1', 'warning');
+                                                                                    class: "a_o_component", 
+                                                                                    a_o: [
+                                                                                        ...(o_state?.o_fragrance?.a_o_component?.map?.((o_component, n_idx_a_o_component)=>{
+                                                                                            return {
+                                                                                                class: 'o_component',
+                                                                                                style: [
+                                                                                                    `background-image:url(${o_component.o_scent.a_s_url_img?.[0]})`
+                                                                                                ].join(';'),
+                                                                                                a_o: [
+                                                                                                    Object.assign(
+                                                                                                        o_component, 
+                                                                                                        {
+                                                                                                            _o_js: {
+                                                                                                                f_o_jsh:async ()=>{
+                                                                                                                    await Promise.all([
+                                                                                                                        f_timeouttry_update_server_data(),
+                                                                                                                    ])
+                                                            
+                                                                                                                    return {
+                                                                                                                        s_tag: "input", 
+                                                                                                                        type: "number",
+                                                                                                                        min: 1, 
+                                                                                                                        max: 99,
+                                                                                                                        step: 1,
+                                                                                                                        value: parseFloat(o_component.n_nor * 100).toFixed(2), 
+                                                                                                                        oninput: async (o_e)=>{
+                                                                                                                            console.log(o_e.target.value)
+                                                                                                                            clearTimeout(o_state.n_id_timeout_tmp);
+                                                                                                                            o_state.n_id_timeout_tmp = setTimeout(async ()=>{
                                         
-                                                                                            return 
-                                                                                        }
-                                                                                        let o_fragrance_existing = o_state.a_o_fragrance.find(
-                                                                                            o=>{
-                                                                                                return o.n_id == n_id
+                                                                                                                                    let n_nor = parseFloat(o_e.target.value)/100;
+                                                                                                                                    if(n_nor <=0 || isNaN(n_nor)){
+                                                                                                                                        return
+                                                                                                                                    }
+                                                                                                                                    if(o_state.o_fragrance.a_o_component.length == 1){
+                                                                                                                                        o_component.n_nor = 1
+                                                                                                                                        return
+                                                                                                                                    }
+                                                                                                                                    let o_component_next = o_state.o_fragrance.a_o_component[f_n_idx_ensured_inside_array(
+                                                                                                                                        n_idx_a_o_component+1, 
+                                                                                                                                        o_state.o_fragrance.a_o_component.length
+                                                                                                                                    )]
+                                                                                                                                    let n_nor_left = (o_component.n_nor+o_component_next.n_nor)-n_nor;
+                                                                                                                                    if(n_nor_left <=0){
+                                                                                                                                        return 
+                                                                                                                                    }
+                                                                                                                                    // let n_nor_left = o_state?.o_fragrance?.a_o_component
+                                                                                                                                    //                     .filter(o=>o!=o_component)
+                                                                                                                                    //                     .reduce((n_acc, o)=>{return n_acc+o.n_nor}, 0)
+                                                                                                                                    //                     -n_nor;
+                                                                                                                                    o_component.n_nor = n_nor;
+                                                                                                                                    o_component_next.n_nor = n_nor_left
+                                                                                                                                    await Promise.all(
+                                                                                                                                        o_state?.o_fragrance?.a_o_component.map(o=>{
+                                                                                                                                            if(o!= o_component){
+                                                                                                                                                return o._o_js._f_render()
+                                                                                                                                            }
+                                                                                                                                        }
+                                                                                                                                    )
+                                        
+                                                                                                                                    );
+                                                                                                                                    f_update_shader_uniform_locations()
+                                                                                                                                    
+                                                                                                                            },10);
+                                        
+                                                                                                                        }
+                                                                                                                    }
+                                                                                                                }
+                                                                                                            }
+                                                                                                        }
+                                                                                                    )._o_js,
+                                                                                                    
+                                                                                                    {
+                                                                                                        innerText: `%`
+                                                                                                    },
+                                                                                                    {
+                                                                                                        s_tag: 'input', 
+                                                                                                        type: 'readonly', 
+                                                                                                        value: ((1.-o_state.o_fragrance.n_nor_ethanol)*o_state.n_ml_target_liquid * o_component.n_nor*o_component.o_scent.n_gram_per_ml).toFixed(2)
+                                                                                                    },
+                                                                                                    {
+                                                                                                        innerText: `gram`
+                                                                                                        // `${
+                                                                                                        //     (1.-o_state.o_fragrance.n_nor_ethanol)*o_state.n_ml_target_liquid * o_component.n_nor
+                                                                                                        // } grams`
+                                                                                                    },
+                                                                                                    {
+                                                                                                        s_tag: "select", 
+                                                                                                        onchange: async (o_e)=>{
+                                                                                                            let o_scent = o_state.a_o_scent.find(o=>{
+                                                                                                                return o.s_name == o_e.target.value
+                                                                                                            });
+                                                                                                            if(o_scent){
+                                                                                                                o_component.o_scent = o_scent 
+                                                                                                                await o_state.o_js__a_o_component._f_render();
+                                                                                                                await f_update_shader();
+                                                                                                            }
+                                                                                                        },
+                                                                                                        a_o: [
+                                                                                                            ...o_state.a_o_scent.map(o_scent=>{
+                                        
+                                                                                                                return {
+                                                                                                                    s_tag: "option", 
+                                                                                                                    innerText: o_scent.s_name,
+                                                                                                                    value: o_scent.s_name,
+                                                                                                                    ...((o_scent.s_name == o_component.o_scent.s_name) ? {
+                                                                                                                        selected: true
+                                                                                                                    }: {})
+                                                                                                                }
+                                                                                                            })
+                                                                                                        ]
+                                                                                                    },
+                                                                                                    // {
+                                                                                                    //     class: "bgimg",
+                                                                                                    //     innerText: o_component.o_scent.s_desc,
+                                                                                                    //     style: [
+                                                                                                    //         `background-image:url(${o_component.o_scent.a_s_url_img?.[0]})`
+                                                                                                    //     ].join(';')
+                                                                                                    // },
+                                                                                                    {
+                                                                                                        style: "display:flex;flex-direction:column",
+                                                                                                        a_o: [
+                                                                                                            
+                                                                                                            {
+                                                                                                                s_tag: "button", 
+                                                                                                                class: "icon-arrow-up", 
+                                                                                                                onpointerdown: async ()=>{
+                                                                                                                    let n_idx_new = f_n_idx_ensured_inside_array(
+                                                                                                                        n_idx_a_o_component-1, 
+                                                                                                                        o_state.o_fragrance.a_o_component.length
+                                                                                                                    );
+                                                                                                                    f_swap_in_array(o_state.o_fragrance.a_o_component, n_idx_a_o_component, n_idx_new)
+                                                                                                                    await o_state.o_js__a_o_component._f_render();
+                                        
+                                                                                                                }
+                                                                                                            },
+                                                                                                            {
+                                                                                                                s_tag: "button", 
+                                                                                                                class: "icon-arrow-down", 
+                                                                                                                onpointerdown: async ()=>{
+                                                                                                                    let n_idx_new = f_n_idx_ensured_inside_array(
+                                                                                                                        n_idx_a_o_component+1, 
+                                                                                                                        o_state.o_fragrance.a_o_component.length
+                                                                                                                    );
+                                                                                                                    f_swap_in_array(o_state.o_fragrance.a_o_component, n_idx_a_o_component, n_idx_new)
+                                                                                                                    await o_state.o_js__a_o_component._f_render();
+                                        
+                                                                                                                }
+                                                                                                            }
+                                                                                                        ]
+                                                                                                    },
+                                                                                                    {
+                                                                                                        s_tag: "button",
+                                                                                                        innerText: "remove", 
+                                                                                                        onpointerdown: async()=>{
+                                                                                                            
+                                                                                                            if(o_state.o_fragrance.a_o_component.length == 1){
+                                                                                                                return
+                                                                                                            }
+                                                                                                            let o_component_before = o_state.o_fragrance.a_o_component[f_n_idx_ensured_inside_array(
+                                                                                                                n_idx_a_o_component-1, 
+                                                                                                                o_state.o_fragrance.a_o_component.length
+                                                                                                            )]
+                                        
+                                                                                                            o_state.o_fragrance.a_o_component = o_state?.o_fragrance?.a_o_component.filter(o=>{
+                                                                                                                return o!=o_component
+                                                                                                            });
+                                                                                                            o_component_before.n_nor += o_component.n_nor;
+                                                                                                            await o_state.o_js__a_o_component._f_render();
+                                                                                                        }
+                                                                                                    }
+                                                                                                ]
                                                                                             }
-                                                                                        );
-                                                                                        if(!o_fragrance_existing){
-                                                                                            o_fragrance_existing = new O_fragrance(
-                                                                                                n_id, 
-                                                                                                [
+                                                                                        })) ?? [], 
+                                                                                        {
+                                                                                            s_tag: "button", 
+                                                                                            innerText: "add component", 
+                                                                                            onpointerdown: async ()=>{
+                                                                                                console.log(o_state.o_fragrance)
+                                                                                                let n_nor = o_state?.o_fragrance?.a_o_component.at(-1).n_nor/2;
+                                        
+                                                                                                o_state.o_fragrance.a_o_component.at(-1).n_nor = n_nor
+                                                                                                
+                                                                                                o_state?.o_fragrance?.a_o_component.push(
                                                                                                     new O_component(
-                                                                                                        o_mod_autogenerated.o_scent__bergamottenminze, 
-                                                                                                        1.0
+                                                                                                        o_state.a_o_scent[0], 
+                                                                                                        n_nor
                                                                                                     )
-                                                                                                ], 
-                                                                                                0.8
-                                                                                            )
-                                                                                            o_state.a_o_fragrance.push(o_fragrance_existing)
-                                                                                        }
-                                                                                        o_state.o_fragrance = o_fragrance_existing
-                                                                                        await f_update_shader();
-                                                                                        await o_state.o_js__a_o_component._f_render();
-                                                                                    }
-                                                                                }
+                                                                                                )
+                                                                                                
+                                                                                                await Promise.all([
+                                                                                                    o_state.o_js__a_o_component._f_render(),
+                                                                                                    f_timeouttry_update_server_data(),
+                                                                                                ])
+                                        
+                                                                                            }
+                                                                                        }, 
+                                        
+                                                                                    ] 
+                                                                                }, 
+                                                                                
                                                                             ]
                                                                         }
                                                                     }
                                                                 }
                                                             }
-                                                        ).o_js__nr,
+                                                        ).o_js__a_o_component,
+
                                                         {
-                                                            style: "display:flex;flex-direction:row",
+                                                            style: "display:flex;flex-direction:column; flex:1",
                                                             a_o: [
-                                                                
-                                                                Object.assign(
-                                                                    o_state, 
-                                                                    {
-                                                                        o_js__a_o_component: {
-                                                                            f_o_jsh: ()=>{
-                                                
-                                                
-                                                                                return {
-                                                                                    class: "a_o_msg",
-                                                                                    a_o: [
-                                                                                        {
-                                                                                            class: "a_o_component", 
-                                                                                            a_o: [
-                                                                                                ...(o_state?.o_fragrance?.a_o_component?.map?.((o_component, n_idx_a_o_component)=>{
-                                                                                                    return {
-                                                                                                        class: 'o_component',
-                                                                                                        style: [
-                                                                                                            `background-image:url(${o_component.o_scent.a_s_url_img?.[0]})`
-                                                                                                        ].join(';'),
-                                                                                                        a_o: [
-                                                                                                            Object.assign(
-                                                                                                                o_component, 
-                                                                                                                {
-                                                                                                                    _o_js: {
-                                                                                                                        f_o_jsh:async ()=>{
-                                                                                                                            await Promise.all([
-                                                                                                                                f_timeouttry_update_server_data(),
-                                                                                                                            ])
-                                                                    
-                                                                                                                            return {
-                                                                                                                                s_tag: "input", 
-                                                                                                                                type: "number",
-                                                                                                                                min: 1, 
-                                                                                                                                max: 99,
-                                                                                                                                step: 1,
-                                                                                                                                value: parseFloat(o_component.n_nor * 100).toFixed(2), 
-                                                                                                                                oninput: async (o_e)=>{
-                                                                                                                                    console.log(o_e.target.value)
-                                                                                                                                    clearTimeout(o_state.n_id_timeout_tmp);
-                                                                                                                                    o_state.n_id_timeout_tmp = setTimeout(async ()=>{
-                                                
-                                                                                                                                            let n_nor = parseFloat(o_e.target.value)/100;
-                                                                                                                                            if(n_nor <=0 || isNaN(n_nor)){
-                                                                                                                                                return
-                                                                                                                                            }
-                                                                                                                                            if(o_state.o_fragrance.a_o_component.length == 1){
-                                                                                                                                                o_component.n_nor = 1
-                                                                                                                                                return
-                                                                                                                                            }
-                                                                                                                                            let o_component_next = o_state.o_fragrance.a_o_component[f_n_idx_ensured_inside_array(
-                                                                                                                                                n_idx_a_o_component+1, 
-                                                                                                                                                o_state.o_fragrance.a_o_component.length
-                                                                                                                                            )]
-                                                                                                                                            let n_nor_left = (o_component.n_nor+o_component_next.n_nor)-n_nor;
-                                                                                                                                            if(n_nor_left <=0){
-                                                                                                                                                return 
-                                                                                                                                            }
-                                                                                                                                            // let n_nor_left = o_state?.o_fragrance?.a_o_component
-                                                                                                                                            //                     .filter(o=>o!=o_component)
-                                                                                                                                            //                     .reduce((n_acc, o)=>{return n_acc+o.n_nor}, 0)
-                                                                                                                                            //                     -n_nor;
-                                                                                                                                            o_component.n_nor = n_nor;
-                                                                                                                                            o_component_next.n_nor = n_nor_left
-                                                                                                                                            await Promise.all(
-                                                                                                                                                o_state?.o_fragrance?.a_o_component.map(o=>{
-                                                                                                                                                    if(o!= o_component){
-                                                                                                                                                        return o._o_js._f_render()
-                                                                                                                                                    }
-                                                                                                                                                }
-                                                                                                                                            )
-                                                
-                                                                                                                                            );
-                                                                                                                                            f_update_shader_uniform_locations()
-                                                                                                                                            
-                                                                                                                                    },10);
-                                                
-                                                                                                                                }
-                                                                                                                            }
-                                                                                                                        }
-                                                                                                                    }
-                                                                                                                }
-                                                                                                            )._o_js,
-                                                                                                            
-                                                                                                            {
-                                                                                                                innerText: `%`
-                                                                                                            },
-                                                                                                            {
-                                                                                                                s_tag: 'input', 
-                                                                                                                type: 'readonly', 
-                                                                                                                value: ((1.-o_state.o_fragrance.n_nor_ethanol)*o_state.n_ml_target_liquid * o_component.n_nor*o_component.o_scent.n_gram_per_ml).toFixed(2)
-                                                                                                            },
-                                                                                                            {
-                                                                                                                innerText: `gram`
-                                                                                                                // `${
-                                                                                                                //     (1.-o_state.o_fragrance.n_nor_ethanol)*o_state.n_ml_target_liquid * o_component.n_nor
-                                                                                                                // } grams`
-                                                                                                            },
-                                                                                                            {
-                                                                                                                s_tag: "select", 
-                                                                                                                onchange: async (o_e)=>{
-                                                                                                                    let o_scent = o_state.a_o_scent.find(o=>{
-                                                                                                                        return o.s_name == o_e.target.value
-                                                                                                                    });
-                                                                                                                    if(o_scent){
-                                                                                                                        o_component.o_scent = o_scent 
-                                                                                                                        await o_state.o_js__a_o_component._f_render();
-                                                                                                                    }
-                                                                                                                },
-                                                                                                                a_o: [
-                                                                                                                    ...o_state.a_o_scent.map(o_scent=>{
-                                                
-                                                                                                                        return {
-                                                                                                                            s_tag: "option", 
-                                                                                                                            innerText: o_scent.s_name,
-                                                                                                                            value: o_scent.s_name,
-                                                                                                                            ...((o_scent.s_name == o_component.o_scent.s_name) ? {
-                                                                                                                                selected: true
-                                                                                                                            }: {})
-                                                                                                                        }
-                                                                                                                    })
-                                                                                                                ]
-                                                                                                            },
-                                                                                                            // {
-                                                                                                            //     class: "bgimg",
-                                                                                                            //     innerText: o_component.o_scent.s_desc,
-                                                                                                            //     style: [
-                                                                                                            //         `background-image:url(${o_component.o_scent.a_s_url_img?.[0]})`
-                                                                                                            //     ].join(';')
-                                                                                                            // },
-                                                                                                            {
-                                                                                                                style: "display:flex;flex-direction:column",
-                                                                                                                a_o: [
-                                                                                                                    
-                                                                                                                    {
-                                                                                                                        s_tag: "button", 
-                                                                                                                        class: "icon-arrow-up", 
-                                                                                                                        onpointerdown: async ()=>{
-                                                                                                                            let n_idx_new = f_n_idx_ensured_inside_array(
-                                                                                                                                n_idx_a_o_component-1, 
-                                                                                                                                o_state.o_fragrance.a_o_component.length
-                                                                                                                            );
-                                                                                                                            f_swap_in_array(o_state.o_fragrance.a_o_component, n_idx_a_o_component, n_idx_new)
-                                                                                                                            await o_state.o_js__a_o_component._f_render();
-                                                
-                                                                                                                        }
-                                                                                                                    },
-                                                                                                                    {
-                                                                                                                        s_tag: "button", 
-                                                                                                                        class: "icon-arrow-down", 
-                                                                                                                        onpointerdown: async ()=>{
-                                                                                                                            let n_idx_new = f_n_idx_ensured_inside_array(
-                                                                                                                                n_idx_a_o_component+1, 
-                                                                                                                                o_state.o_fragrance.a_o_component.length
-                                                                                                                            );
-                                                                                                                            f_swap_in_array(o_state.o_fragrance.a_o_component, n_idx_a_o_component, n_idx_new)
-                                                                                                                            await o_state.o_js__a_o_component._f_render();
-                                                
-                                                                                                                        }
-                                                                                                                    }
-                                                                                                                ]
-                                                                                                            },
-                                                                                                            {
-                                                                                                                s_tag: "button",
-                                                                                                                innerText: "remove", 
-                                                                                                                onpointerdown: async()=>{
-                                                                                                                    
-                                                                                                                    if(o_state.o_fragrance.a_o_component.length == 1){
-                                                                                                                        return
-                                                                                                                    }
-                                                                                                                    let o_component_before = o_state.o_fragrance.a_o_component[f_n_idx_ensured_inside_array(
-                                                                                                                        n_idx_a_o_component-1, 
-                                                                                                                        o_state.o_fragrance.a_o_component.length
-                                                                                                                    )]
-                                                
-                                                                                                                    o_state.o_fragrance.a_o_component = o_state?.o_fragrance?.a_o_component.filter(o=>{
-                                                                                                                        return o!=o_component
-                                                                                                                    });
-                                                                                                                    o_component_before.n_nor += o_component.n_nor;
-                                                                                                                    await o_state.o_js__a_o_component._f_render();
-                                                                                                                }
-                                                                                                            }
-                                                                                                        ]
-                                                                                                    }
-                                                                                                })) ?? [], 
-                                                                                                {
-                                                                                                    s_tag: "button", 
-                                                                                                    innerText: "add component", 
-                                                                                                    onpointerdown: async ()=>{
-                                                                                                        console.log(o_state.o_fragrance)
-                                                                                                        let n_nor = o_state?.o_fragrance?.a_o_component.at(-1).n_nor/2;
-                                                
-                                                                                                        o_state.o_fragrance.a_o_component.at(-1).n_nor = n_nor
-                                                                                                        
-                                                                                                        o_state?.o_fragrance?.a_o_component.push(
-                                                                                                            new O_component(
-                                                                                                                o_state.a_o_scent[0], 
-                                                                                                                n_nor
-                                                                                                            )
-                                                                                                        )
-                                                                                                        
-                                                                                                        await Promise.all([
-                                                                                                            o_state.o_js__a_o_component._f_render(),
-                                                                                                            f_timeouttry_update_server_data(),
-                                                                                                        ])
-                                                
-                                                                                                    }
-                                                                                                }, 
-                                                
-                                                                                            ] 
-                                                                                        }, 
-                                                                                        
-                                                                                    ]
-                                                                                }
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                ).o_js__a_o_component,
 
                                                                 {
-                                                                    style: "display:flex;flex-direction:column; flex:1",
+                                                                    id: "canvas_parent", 
+                                                                },
+                                                                {
                                                                     a_o: [
-
-                                                                        {
-                                                                            id: "canvas_parent", 
-                                                                        },
-                                                                        {
-                                                                            a_o: [
-                                                                                Object.assign(
-                                                                                    o_state,
-                                                                                        {
-                                                                                            o_js_liquid_grams:{
-                                                                                            f_o_jsh:()=>{
-                                                                                                return {
-                                                                                                    a_o: [
-                                                                                                        {
-                                                                                                            innerText: "target liquid (mililiters ml)",
-                                                                                                        },
-                                                                                                        {
-                                                                                                            s_tag: "input", 
-                                                                                                            type:"number", 
-                                                                                                            step:1,
-                                                                                                            value: o_state.n_ml_target_liquid, 
-                                                                                                            oninput: async (o_e)=>{
-                                                                                                                let n_grams = parseFloat(o_e.target.value)
-                                                                                                                o_state.n_ml_target_liquid = n_grams
-                                                                
-                                                                                                                await Promise.all([
-                                                                                                                    o_state.o_js__a_o_component._f_render(),
-                                                                                                                    o_state.o_js__components._f_render(),
-                                                                                                                    o_state.o_js__ethanol._f_render(),
-                                                                                                                    f_timeouttry_update_server_data(),
-                                                                                                                ])
-                                                                                                            }
-                                                                                                        },
-                                                                                                    ]
-                                                                                                }
-                                                                                            }
+                                                                        Object.assign(
+                                                                            o_state,
+                                                                                {
+                                                                                    o_js_liquid_grams:{
+                                                                                    f_o_jsh:()=>{
+                                                                                        return {
+                                                                                            a_o: [
+                                                                                                {
+                                                                                                    innerText: "target liquid (mililiters ml)",
+                                                                                                },
+                                                                                                {
+                                                                                                    s_tag: "input", 
+                                                                                                    type:"number", 
+                                                                                                    step:1,
+                                                                                                    value: o_state.n_ml_target_liquid, 
+                                                                                                    oninput: async (o_e)=>{
+                                                                                                        let n_grams = parseFloat(o_e.target.value)
+                                                                                                        o_state.n_ml_target_liquid = n_grams
+                                                        
+                                                                                                        await Promise.all([
+                                                                                                            o_state.o_js__a_o_component._f_render(),
+                                                                                                            o_state.o_js__components._f_render(),
+                                                                                                            o_state.o_js__ethanol._f_render(),
+                                                                                                            f_timeouttry_update_server_data(),
+                                                                                                        ])
+                                                                                                    }
+                                                                                                },
+                                                                                            ]
                                                                                         }
                                                                                     }
-                                                                                ).o_js_liquid_grams,
-                                                                                Object.assign(
-                                                                                    o_state,
-                                                                                        {
-                                                                                            o_js__components:{
-                                                                                            f_o_jsh:()=>{
-                                                                                                return {
-                                                                                                    a_o: [
-                                                                                                        {
-                                                                                                            innerText: "components",
-                                                                                                        },
-                                                                                                        {
-                                                                                                            s_tag: "input", 
-                                                                                                            type:"number", 
-                                                                                                            step:0.1,
-                                                                                                            value: (1.-o_state.o_fragrance.n_nor_ethanol).toFixed(2),
-                                                                                                            oninput:async (o_e)=>{
-                                                                                                                let n = parseFloat(o_e.target.value);
-                                                                                                                if(n<=0 || isNaN(n)){
-                                                                                                                    return
-                                                                                                                }
-                                                                                                                o_state.o_fragrance.n_nor_ethanol = (1.-n)
-                                                                                                                await Promise.all([
-                                                                                                                    o_state.o_js__a_o_component._f_render(),
-                                                                                                                    o_state.o_js__ethanol._f_render(),
-                                                                                                                    f_timeouttry_update_server_data(),
-                                                                                                                ])
-                                                                                                            }
-                                                                                                        },
-                                                                                                        {
-                                                                                                            innerText: `${(1.-o_state.o_fragrance.n_nor_ethanol)*o_state.n_ml_target_liquid} grams`
-                                                                                                        },
-                                                                                                    ]
-                                                                                                }
-                                                                                            }
+                                                                                }
+                                                                            }
+                                                                        ).o_js_liquid_grams,
+                                                                        Object.assign(
+                                                                            o_state,
+                                                                                {
+                                                                                    o_js__components:{
+                                                                                    f_o_jsh:()=>{
+                                                                                        return {
+                                                                                            a_o: [
+                                                                                                {
+                                                                                                    innerText: "components",
+                                                                                                },
+                                                                                                {
+                                                                                                    s_tag: "input", 
+                                                                                                    type:"number", 
+                                                                                                    step:0.1,
+                                                                                                    value: (1.-o_state.o_fragrance.n_nor_ethanol).toFixed(2),
+                                                                                                    oninput:async (o_e)=>{
+                                                                                                        let n = parseFloat(o_e.target.value);
+                                                                                                        if(n<=0 || isNaN(n)){
+                                                                                                            return
+                                                                                                        }
+                                                                                                        o_state.o_fragrance.n_nor_ethanol = (1.-n)
+                                                                                                        await Promise.all([
+                                                                                                            o_state.o_js__a_o_component._f_render(),
+                                                                                                            o_state.o_js__ethanol._f_render(),
+                                                                                                            f_timeouttry_update_server_data(),
+                                                                                                        ])
+                                                                                                    }
+                                                                                                },
+                                                                                                {
+                                                                                                    innerText: `${(1.-o_state.o_fragrance.n_nor_ethanol)*o_state.n_ml_target_liquid} grams`
+                                                                                                },
+                                                                                            ]
                                                                                         }
                                                                                     }
-                                                                                ).o_js__components,
-                                                                                Object.assign(
-                                                                                    o_state,
-                                                                                        {
-                                                                                            o_js__ethanol:{
-                                                                                            f_o_jsh:async ()=>{
-                                                                                                return {
-                                                                                                    a_o: [
-                                                                                                        {
-                                                                                                            innerText: "ethanol",
-                                                                                                        },
-                                                                                                        {
-                                                                                                            s_tag: "input", 
-                                                                                                            type:"number", 
-                                                                                                            step:0.1,
-                                                                                                            value: o_state.o_fragrance.n_nor_ethanol, 
-                                                                                                            oninput:async (o_e)=>{
-                                                                                                                let n = parseFloat(o_e.target.value);
-                                                                                                                if(n<=0 || isNaN(n)){
-                                                                                                                    return
-                                                                                                                }
-                                                                                                                o_state.o_fragrance.n_nor_ethanol = n
-                                                                                                                await Promise.all([
-                                                                                                                    o_state.o_js__a_o_component._f_render(),
-                                                                                                                    o_state.o_js__components._f_render(),
-                                                                                                                    f_timeouttry_update_server_data(),
-                                                                                                                ])
-                                                                
-                                                                                                                // await o_state.o_js__ethanol._f_render();
-                                                                                                            }
-                                                                                                        },
-                                                                                                        {
-                                                                                                            innerText: `${o_state.o_fragrance.n_nor_ethanol*o_state.n_ml_target_liquid} grams`
-                                                                                                        },
-                                                                                                        
-                                                                                                    ]
-                                                                                                }
-                                                                                            }
+                                                                                }
+                                                                            }
+                                                                        ).o_js__components,
+                                                                        Object.assign(
+                                                                            o_state,
+                                                                                {
+                                                                                    o_js__ethanol:{
+                                                                                    f_o_jsh:async ()=>{
+                                                                                        return {
+                                                                                            a_o: [
+                                                                                                {
+                                                                                                    innerText: "ethanol",
+                                                                                                },
+                                                                                                {
+                                                                                                    s_tag: "input", 
+                                                                                                    type:"number", 
+                                                                                                    step:0.1,
+                                                                                                    value: o_state.o_fragrance.n_nor_ethanol, 
+                                                                                                    oninput:async (o_e)=>{
+                                                                                                        let n = parseFloat(o_e.target.value);
+                                                                                                        if(n<=0 || isNaN(n)){
+                                                                                                            return
+                                                                                                        }
+                                                                                                        o_state.o_fragrance.n_nor_ethanol = n
+                                                                                                        await Promise.all([
+                                                                                                            o_state.o_js__a_o_component._f_render(),
+                                                                                                            o_state.o_js__components._f_render(),
+                                                                                                            f_timeouttry_update_server_data(),
+                                                                                                        ])
+                                                        
+                                                                                                        // await o_state.o_js__ethanol._f_render();
+                                                                                                    }
+                                                                                                },
+                                                                                                {
+                                                                                                    innerText: `${o_state.o_fragrance.n_nor_ethanol*o_state.n_ml_target_liquid} grams`
+                                                                                                },
+                                                                                                
+                                                                                            ]
                                                                                         }
                                                                                     }
-                                                                                ).o_js__ethanol,
-                                                                            ]
-                                                                        }
-                                                                        
+                                                                                }
+                                                                            }
+                                                                        ).o_js__ethanol,
                                                                     ]
                                                                 }
-
+                                                                
                                                             ]
                                                         }
-                                                        
+
                                                     ]
                                                 }
+                                                
                                             ]
+                              
                                         }
                                     ]
                                 }

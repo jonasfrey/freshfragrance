@@ -40,12 +40,12 @@ class O_scent{
 class O_img{
     constructor(
         s_url, 
-        o_js_iamge_object
+        o_js_image_object
         // o_canvas, 
         // o_image_data
     ){
         this.s_url = s_url
-        this.o_js_iamge_object = o_js_iamge_object
+        this.o_js_image_object = o_js_image_object
         // this.o_canvas = o_canvas, 
         // this.o_image_data = o_image_data
     }

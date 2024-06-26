@@ -257,7 +257,7 @@
                         1
                     ]
                 },
-                "n_nor": 0.24,
+                "n_nor": 0.35,
                 "_o_js": {
                     "o_jsh": {
                         "s_tag": "input",
@@ -265,7 +265,7 @@
                         "min": 1,
                         "max": 99,
                         "step": 1,
-                        "value": "24.00"
+                        "value": "35.00"
                     },
                     "_o_html": {
                         "s_tag": "input"
@@ -287,7 +287,7 @@
                         1
                     ]
                 },
-                "n_nor": 0.28,
+                "n_nor": 0.21,
                 "_o_js": {
                     "o_jsh": {
                         "s_tag": "input",
@@ -295,7 +295,7 @@
                         "min": 1,
                         "max": 99,
                         "step": 1,
-                        "value": "28.00"
+                        "value": "21.00"
                     },
                     "_o_html": {
                         "s_tag": "input"
@@ -317,7 +317,7 @@
                         1
                     ]
                 },
-                "n_nor": 0.15,
+                "n_nor": 0.11000000000000007,
                 "_o_js": {
                     "o_jsh": {
                         "s_tag": "input",
@@ -325,7 +325,7 @@
                         "min": 1,
                         "max": 99,
                         "step": 1,
-                        "value": "15.00"
+                        "value": "11.00"
                     },
                     "_o_html": {
                         "s_tag": "input"
@@ -592,20 +592,20 @@
         "a_o_component": [
             {
                 "o_scent": {
-                    "s_name": "Bergamottenminze",
-                    "s_desc": "Mentha citrata",
+                    "s_name": "Tanne weiss",
+                    "s_desc": "Aibes alba",
                     "a_s_url_img": [
-                        "./images/bergamottenminze.jpeg"
+                        "./images/tanne_weiss.jpeg"
                     ],
-                    "n_gram_per_ml": 0.89,
+                    "n_gram_per_ml": 0.9,
                     "a_n_channel_rgba_color": [
-                        0.5019607843137255,
-                        0.5647058823529412,
-                        0.2549019607843137,
+                        0.25882352941176473,
+                        0.25098039215686274,
+                        0.14901960784313725,
                         1
                     ]
                 },
-                "n_nor": 1,
+                "n_nor": 0.2,
                 "_o_js": {
                     "o_jsh": {
                         "s_tag": "input",
@@ -613,7 +613,157 @@
                         "min": 1,
                         "max": 99,
                         "step": 1,
-                        "value": "100.00"
+                        "value": "20.00"
+                    },
+                    "_o_html": {
+                        "s_tag": "input"
+                    }
+                }
+            },
+            {
+                "o_scent": {
+                    "s_name": "Jasmin Absolute 10%",
+                    "s_desc": "Jasminum Grandiflorum",
+                    "a_s_url_img": [
+                        "./images/jasmin.jpeg"
+                    ],
+                    "n_gram_per_ml": 0.89,
+                    "a_n_channel_rgba_color": [
+                        0.9764705882352941,
+                        0.9803921568627451,
+                        0.9215686274509803,
+                        1
+                    ]
+                },
+                "n_nor": 0.2,
+                "_o_js": {
+                    "o_jsh": {
+                        "s_tag": "input",
+                        "type": "number",
+                        "min": 1,
+                        "max": 99,
+                        "step": 1,
+                        "value": "20.00"
+                    },
+                    "_o_html": {
+                        "s_tag": "input"
+                    }
+                }
+            },
+            {
+                "o_scent": {
+                    "s_name": "Fichtennadel",
+                    "s_desc": "Picea abies",
+                    "a_s_url_img": [
+                        "./images/picea_abies.jpeg"
+                    ],
+                    "n_gram_per_ml": 0.89,
+                    "a_n_channel_rgba_color": [
+                        0.9176470588235294,
+                        0.6392156862745098,
+                        0.6549019607843137,
+                        1
+                    ]
+                },
+                "n_nor": 0.2,
+                "_o_js": {
+                    "o_jsh": {
+                        "s_tag": "input",
+                        "type": "number",
+                        "min": 1,
+                        "max": 99,
+                        "step": 1,
+                        "value": "20.00"
+                    },
+                    "_o_html": {
+                        "s_tag": "input"
+                    }
+                }
+            },
+            {
+                "o_scent": {
+                    "s_name": "Lavandin super",
+                    "s_desc": "Lavandula hybrida",
+                    "a_s_url_img": [
+                        "./images/lavendel.jpeg"
+                    ],
+                    "n_gram_per_ml": 0.91,
+                    "a_n_channel_rgba_color": [
+                        1,
+                        1,
+                        1,
+                        1
+                    ]
+                },
+                "n_nor": 0.2,
+                "_o_js": {
+                    "o_jsh": {
+                        "s_tag": "input",
+                        "type": "number",
+                        "min": 1,
+                        "max": 99,
+                        "step": 1,
+                        "value": "20.00"
+                    },
+                    "_o_html": {
+                        "s_tag": "input"
+                    }
+                }
+            },
+            {
+                "o_scent": {
+                    "s_name": "Citronella",
+                    "s_desc": "Cymbopogon winterianus",
+                    "a_s_url_img": [
+                        "./images/citronella.png"
+                    ],
+                    "n_gram_per_ml": 0.88,
+                    "a_n_channel_rgba_color": [
+                        0.44313725490196076,
+                        0.5372549019607843,
+                        0.32941176470588235,
+                        1
+                    ]
+                },
+                "n_nor": 0.02,
+                "_o_js": {
+                    "o_jsh": {
+                        "s_tag": "input",
+                        "type": "number",
+                        "min": 1,
+                        "max": 99,
+                        "step": 1,
+                        "value": "2.00"
+                    },
+                    "_o_html": {
+                        "s_tag": "input"
+                    }
+                }
+            },
+            {
+                "o_scent": {
+                    "s_name": "Jasmin Absolute 10%",
+                    "s_desc": "Jasminum Grandiflorum",
+                    "a_s_url_img": [
+                        "./images/jasmin.jpeg"
+                    ],
+                    "n_gram_per_ml": 0.89,
+                    "a_n_channel_rgba_color": [
+                        0.9764705882352941,
+                        0.9803921568627451,
+                        0.9215686274509803,
+                        1
+                    ]
+                },
+                "n_nor": 0.17999999999999988,
+                "_o_js": {
+                    "o_jsh": {
+                        "s_tag": "input",
+                        "type": "number",
+                        "min": 1,
+                        "max": 99,
+                        "step": 1,
+                        "value": "18.00"
                     },
                     "_o_html": {
                         "s_tag": "input"
