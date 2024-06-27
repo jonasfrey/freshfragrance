@@ -37,22 +37,20 @@ class O_scent{
     }
 }
 
-class O_img{
+class O_img_texture{
     constructor(
         s_url, 
-        o_js_image_object
-        // o_canvas, 
-        // o_image_data
+        o_js_image_object, 
+        o_texture
     ){
         this.s_url = s_url
         this.o_js_image_object = o_js_image_object
-        // this.o_canvas = o_canvas, 
-        // this.o_image_data = o_image_data
+        this.o_texture = o_texture
     }
 }
 export {
     O_fragrance, 
     O_component,
     O_scent, 
-    O_img
+    O_img_texture
 }
