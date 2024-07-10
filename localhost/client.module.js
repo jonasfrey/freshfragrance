@@ -9,7 +9,7 @@ import {
 import {
     f_o_html__and_make_renderable,
 }
-from 'https://deno.land/x/f_o_html_from_o_js@3.4/mod.js'
+from 'https://deno.land/x/f_o_html_from_o_js@3.5/mod.js'
 
 
 import {
@@ -133,6 +133,9 @@ f_add_css(
 
 );
 
+let o = await fetch("./funcions.glsl");
+let s_functions_glsl = await o.text();
+
 let f_update_shader_uniform_locations = function(){
 
     let o_gl = o_webgl_program.o_ctx;
@@ -211,28 +214,7 @@ let f_update_shader = async function(){
         ].join('\n')
     }).join('\n')}
 
-    float f_n_sdf_pie( 
-        vec2 p2, 
-        float n_ang_nor_start, 
-        float n_ang_nor_end, 
-        float r
-    )
-    {
-        //https://www.shadertoy.com/view/XXcSRs
-        float n_ang_nor = abs(n_ang_nor_start-n_ang_nor_end);
-        float n_tau = 6.2831;
-    
-        float n_ang_rot = (n_ang_nor_start + n_ang_nor/2.+.25)*n_tau;
-        vec2 p = mat2(
-            sin(n_ang_rot), -cos(n_ang_rot),
-            cos(n_ang_rot), sin(n_ang_rot)
-        )*p2;
-        vec2 c = vec2(sin(n_ang_nor/2.*n_tau), cos(n_ang_nor/2.*n_tau));
-        p.x = abs(p.x);
-        float l = length(p) - r;
-        float m = length(p - c*clamp(dot(p,c),0.0,r) );
-        return max(l,m*sign(c.y*p.x-c.x*p.y));
-    }
+    ${s_functions_glsl}
 
     void main() {
         float nt = n_ms_time *.001;
@@ -257,12 +239,13 @@ let f_update_shader = async function(){
             vec4 o_vec4_col_a_o_component = a_o_vec4_col_a_o_component[n_idx_a_o_component];
 
             float n_ang = n_tau * n_it_nor;
-            float n2 = f_n_sdf_pie(
+            float n_pizza_slice = f_n_pizza_slice(
                 o_trn_nor_pixel,
                 o_component[0],
                 o_component[1],
                 n_radius
             );
+            float n2 = n_pizza_slice;
             float n_nor_ang_between = 
             
             min(
@@ -280,7 +263,7 @@ let f_update_shader = async function(){
             )*(n_radius/2.)
             
             );
-            float n_inside = smoothstep(0.01, 0.0,n2);
+            float n_inside = smoothstep(0.41, 0.0,n2);
             n2 = pow(n2, 1./3.)*2.;
             n2 = clamp(n2, 0., 1.);
             //o_col += vec4(clamp(1.-pow(abs(length((o_trn_nor_pixel-o_segment_center)*(5.+n_it_nor*10.))-.5)*5., 1./12.)*1.2,0., 1.));
@@ -296,8 +279,13 @@ let f_update_shader = async function(){
                     );
                 }`
             }).join('\n')}
-
-            // break;
+            float n3 = n_pizza_slice;
+            //n3 = abs(n3-.5);
+            n3 = smoothstep(0.0, 0.2, n3);
+            n3 = pow(n3, 1./5.)*1.1;
+            o_col += vec4((1.-n3)*o_vec4_col_a_o_component);
+            o_col = vec4(n_inside);
+            break;
             n_idx_a_o_component+=1;
 
         }
@@ -501,14 +489,14 @@ let o_state = {
 
 }
 
-// // update the references
-// for(let o_fragrance of o_state.a_o_fragrance){
-//     o_fragrance.a_o_component.map(o=>{
-//         o.o_scent = o_state.a_o_scent.find(o2=>{
-//             return o2.s_name == o.o_scent.s_name
-//         })
-//     })
-// }
+// update the references
+for(let o_fragrance of o_state.a_o_fragrance){
+    o_fragrance.a_o_component.map(o=>{
+        o.o_scent = o_state.a_o_scent.find(o2=>{
+            return o2.s_name == o.o_scent.s_name
+        })
+    })
+}
 
 let n_id_raf = 0;
 let f_raf = function(){
@@ -801,7 +789,6 @@ document.body.appendChild(
                                                         'flex:1'
                                                     ].join(';\n'),
                                                     a_o: [
-                                                        
                                                         Object.assign(
                                                             o_state, 
                                                             {
@@ -1018,9 +1005,12 @@ document.body.appendChild(
                                                         {
                                                             style: "display:flex;flex-direction:column; flex:1",
                                                             a_o: [
-
                                                                 {
-                                                                    id: "canvas_parent", 
+                                                                    f_after_f_o_html__and_make_renderable: (v_o_html)=>{
+                                                                        // console.log({v_o_html})
+                                                                        v_o_html.appendChild(o_canvas);
+                                                                    },
+                                                                    id: "canvas_parent"
                                                                 },
                                                                 {
                                                                     a_o: [
@@ -1158,7 +1148,7 @@ document.body.appendChild(
     )
 );
 // //readme.md:end
-document.querySelector("#canvas_parent")?.appendChild(o_canvas);
+
 
 let n = 0; 
 let n_from_urlhash = parseInt(window.location.hash.slice(1));
@@ -1176,6 +1166,7 @@ if(o_fragrance){
 }
 await o_state.o_js__a_o_component._f_render();
 await o_state.o_js__nr._f_render();
+document.querySelector("#canvas_parent")?.appendChild(o_canvas);
 
 await f_timeouttry_update_server_data();
 

@@ -9,7 +9,13 @@
                     "a_s_url_img": [
                         "./images/citronella.png"
                     ],
-                    "n_gram_per_ml": 0.88
+                    "n_gram_per_ml": 0.88,
+                    "a_n_channel_rgba_color": [
+                        0.44313725490196076,
+                        0.5372549019607843,
+                        0.32941176470588235,
+                        1
+                    ]
                 },
                 "n_nor": 0.22,
                 "_o_js": {
@@ -33,7 +39,13 @@
                     "a_s_url_img": [
                         "./images/bergamottenminze.jpeg"
                     ],
-                    "n_gram_per_ml": 0.89
+                    "n_gram_per_ml": 0.89,
+                    "a_n_channel_rgba_color": [
+                        0.5019607843137255,
+                        0.5647058823529412,
+                        0.2549019607843137,
+                        1
+                    ]
                 },
                 "n_nor": 0.66,
                 "_o_js": {
@@ -57,7 +69,13 @@
                     "a_s_url_img": [
                         "./images/picea_abies.jpeg"
                     ],
-                    "n_gram_per_ml": 0.89
+                    "n_gram_per_ml": 0.89,
+                    "a_n_channel_rgba_color": [
+                        0.9176470588235294,
+                        0.6392156862745098,
+                        0.6549019607843137,
+                        1
+                    ]
                 },
                 "n_nor": 0.12000000000000002,
                 "_o_js": {
@@ -87,7 +105,13 @@
                     "a_s_url_img": [
                         "./images/bergamottenminze.jpeg"
                     ],
-                    "n_gram_per_ml": 0.89
+                    "n_gram_per_ml": 0.89,
+                    "a_n_channel_rgba_color": [
+                        0.5019607843137255,
+                        0.5647058823529412,
+                        0.2549019607843137,
+                        1
+                    ]
                 },
                 "n_nor": 1,
                 "_o_js": {
@@ -117,7 +141,13 @@
                     "a_s_url_img": [
                         "./images/bergamottenminze.jpeg"
                     ],
-                    "n_gram_per_ml": 0.89
+                    "n_gram_per_ml": 0.89,
+                    "a_n_channel_rgba_color": [
+                        0.5019607843137255,
+                        0.5647058823529412,
+                        0.2549019607843137,
+                        1
+                    ]
                 },
                 "n_nor": 1,
                 "_o_js": {
@@ -147,7 +177,13 @@
                     "a_s_url_img": [
                         "./images/bergamottenminze.jpeg"
                     ],
-                    "n_gram_per_ml": 0.89
+                    "n_gram_per_ml": 0.89,
+                    "a_n_channel_rgba_color": [
+                        0.5019607843137255,
+                        0.5647058823529412,
+                        0.2549019607843137,
+                        1
+                    ]
                 },
                 "n_nor": 1,
                 "_o_js": {
@@ -177,7 +213,13 @@
                     "a_s_url_img": [
                         "./images/bergamottenminze.jpeg"
                     ],
-                    "n_gram_per_ml": 0.89
+                    "n_gram_per_ml": 0.89,
+                    "a_n_channel_rgba_color": [
+                        0.5019607843137255,
+                        0.5647058823529412,
+                        0.2549019607843137,
+                        1
+                    ]
                 },
                 "n_nor": 1,
                 "_o_js": {
@@ -205,9 +247,15 @@
                     "s_name": "Vanilla",
                     "s_desc": "essential oil, vanilla planifolia",
                     "a_s_url_img": [
-                        "./images/vanilla.jpeg"
+                        "https://media.istockphoto.com/id/184607818/photo/vanilla-isolated-on-white.jpg?s=612x612&w=0&k=20&c=71UINz4Ngw2skQV1vVz8rLSvgK0d1Xrry-8sYK6D3Eo="
                     ],
-                    "n_gram_per_ml": 0.96
+                    "n_gram_per_ml": 0.96,
+                    "a_n_channel_rgba_color": [
+                        0.9372549019607843,
+                        0.8745098039215686,
+                        0.7058823529411765,
+                        1
+                    ]
                 },
                 "n_nor": 0.24,
                 "_o_js": {
@@ -231,7 +279,13 @@
                     "a_s_url_img": [
                         "./images/lavendel.jpeg"
                     ],
-                    "n_gram_per_ml": 0.91
+                    "n_gram_per_ml": 0.91,
+                    "a_n_channel_rgba_color": [
+                        1,
+                        1,
+                        1,
+                        1
+                    ]
                 },
                 "n_nor": 0.18,
                 "_o_js": {
@@ -245,7 +299,8 @@
                     },
                     "_o_html": {
                         "s_tag": "input"
-                    }
+                    },
+                    "_b_rendering": false
                 }
             },
             {
@@ -255,7 +310,13 @@
                     "a_s_url_img": [
                         "./images/jasmin.jpeg"
                     ],
-                    "n_gram_per_ml": 0.89
+                    "n_gram_per_ml": 0.89,
+                    "a_n_channel_rgba_color": [
+                        0.9764705882352941,
+                        0.9803921568627451,
+                        0.9215686274509803,
+                        1
+                    ]
                 },
                 "n_nor": 0.18,
                 "_o_js": {
@@ -269,7 +330,8 @@
                     },
                     "_o_html": {
                         "s_tag": "input"
-                    }
+                    },
+                    "_b_rendering": false
                 }
             },
             {
@@ -279,7 +341,13 @@
                     "a_s_url_img": [
                         "./images/thymian.jpeg"
                     ],
-                    "n_gram_per_ml": 0.91
+                    "n_gram_per_ml": 0.91,
+                    "a_n_channel_rgba_color": [
+                        0.9294117647058824,
+                        0.7607843137254902,
+                        0.9568627450980393,
+                        1
+                    ]
                 },
                 "n_nor": 0.12,
                 "_o_js": {
@@ -293,7 +361,8 @@
                     },
                     "_o_html": {
                         "s_tag": "input"
-                    }
+                    },
+                    "_b_rendering": false
                 }
             },
             {
@@ -303,7 +372,13 @@
                     "a_s_url_img": [
                         "./images/zimtrinde.jpeg"
                     ],
-                    "n_gram_per_ml": 1
+                    "n_gram_per_ml": 1,
+                    "a_n_channel_rgba_color": [
+                        0.7411764705882353,
+                        0.5529411764705883,
+                        0.3607843137254902,
+                        1
+                    ]
                 },
                 "n_nor": 0.12,
                 "_o_js": {
@@ -317,7 +392,8 @@
                     },
                     "_o_html": {
                         "s_tag": "input"
-                    }
+                    },
+                    "_b_rendering": false
                 }
             },
             {
@@ -327,7 +403,13 @@
                     "a_s_url_img": [
                         "./images/bergamottenminze.jpeg"
                     ],
-                    "n_gram_per_ml": 0.89
+                    "n_gram_per_ml": 0.89,
+                    "a_n_channel_rgba_color": [
+                        0.5019607843137255,
+                        0.5647058823529412,
+                        0.2549019607843137,
+                        1
+                    ]
                 },
                 "n_nor": 0.06,
                 "_o_js": {
@@ -341,7 +423,8 @@
                     },
                     "_o_html": {
                         "s_tag": "input"
-                    }
+                    },
+                    "_b_rendering": false
                 }
             },
             {
@@ -351,7 +434,13 @@
                     "a_s_url_img": [
                         "./images/tanne_weiss.jpeg"
                     ],
-                    "n_gram_per_ml": 0.9
+                    "n_gram_per_ml": 0.9,
+                    "a_n_channel_rgba_color": [
+                        0.25882352941176473,
+                        0.25098039215686274,
+                        0.14901960784313725,
+                        1
+                    ]
                 },
                 "n_nor": 0.06,
                 "_o_js": {
@@ -365,7 +454,8 @@
                     },
                     "_o_html": {
                         "s_tag": "input"
-                    }
+                    },
+                    "_b_rendering": false
                 }
             },
             {
@@ -375,7 +465,13 @@
                     "a_s_url_img": [
                         "./images/salvia.jpeg"
                     ],
-                    "n_gram_per_ml": 0.92
+                    "n_gram_per_ml": 0.92,
+                    "a_n_channel_rgba_color": [
+                        0.7176470588235294,
+                        0.788235294117647,
+                        0.6666666666666666,
+                        1
+                    ]
                 },
                 "n_nor": 0.02,
                 "_o_js": {
@@ -389,7 +485,8 @@
                     },
                     "_o_html": {
                         "s_tag": "input"
-                    }
+                    },
+                    "_b_rendering": false
                 }
             },
             {
@@ -399,7 +496,13 @@
                     "a_s_url_img": [
                         "./images/citronella.png"
                     ],
-                    "n_gram_per_ml": 0.88
+                    "n_gram_per_ml": 0.88,
+                    "a_n_channel_rgba_color": [
+                        0.44313725490196076,
+                        0.5372549019607843,
+                        0.32941176470588235,
+                        1
+                    ]
                 },
                 "n_nor": 0.02000000000000009,
                 "_o_js": {
@@ -413,7 +516,8 @@
                     },
                     "_o_html": {
                         "s_tag": "input"
-                    }
+                    },
+                    "_b_rendering": false
                 }
             }
         ],
@@ -429,7 +533,13 @@
                     "a_s_url_img": [
                         "./images/bergamottenminze.jpeg"
                     ],
-                    "n_gram_per_ml": 0.89
+                    "n_gram_per_ml": 0.89,
+                    "a_n_channel_rgba_color": [
+                        0.5019607843137255,
+                        0.5647058823529412,
+                        0.2549019607843137,
+                        1
+                    ]
                 },
                 "n_nor": 1,
                 "_o_js": {
@@ -459,7 +569,13 @@
                     "a_s_url_img": [
                         "./images/bergamottenminze.jpeg"
                     ],
-                    "n_gram_per_ml": 0.89
+                    "n_gram_per_ml": 0.89,
+                    "a_n_channel_rgba_color": [
+                        0.5019607843137255,
+                        0.5647058823529412,
+                        0.2549019607843137,
+                        1
+                    ]
                 },
                 "n_nor": 1,
                 "_o_js": {
@@ -489,7 +605,13 @@
                     "a_s_url_img": [
                         "./images/bergamottenminze.jpeg"
                     ],
-                    "n_gram_per_ml": 0.89
+                    "n_gram_per_ml": 0.89,
+                    "a_n_channel_rgba_color": [
+                        0.5019607843137255,
+                        0.5647058823529412,
+                        0.2549019607843137,
+                        1
+                    ]
                 },
                 "n_nor": 1,
                 "_o_js": {
@@ -519,7 +641,13 @@
                     "a_s_url_img": [
                         "./images/bergamottenminze.jpeg"
                     ],
-                    "n_gram_per_ml": 0.89
+                    "n_gram_per_ml": 0.89,
+                    "a_n_channel_rgba_color": [
+                        0.5019607843137255,
+                        0.5647058823529412,
+                        0.2549019607843137,
+                        1
+                    ]
                 },
                 "n_nor": 1,
                 "_o_js": {
@@ -549,7 +677,13 @@
                     "a_s_url_img": [
                         "./images/bergamottenminze.jpeg"
                     ],
-                    "n_gram_per_ml": 0.89
+                    "n_gram_per_ml": 0.89,
+                    "a_n_channel_rgba_color": [
+                        0.5019607843137255,
+                        0.5647058823529412,
+                        0.2549019607843137,
+                        1
+                    ]
                 },
                 "n_nor": 1,
                 "_o_js": {
